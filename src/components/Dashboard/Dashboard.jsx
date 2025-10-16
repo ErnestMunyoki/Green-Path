@@ -1,24 +1,46 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
-import {
-  weeklyEmissions,
-  categoryEmissions,
-  achievements
-} from "../../utils/mockData";
 
 export default function Dashboard() {
+  const [weeklyEmissions, setWeeklyEmissions] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/api/emissions/weekly")
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = Object.entries(data).map(([day, emission]) => ({
+          day,
+          emission,
+        }));
+        setWeeklyEmissions(formatted);
+      })
+      .catch((err) => console.error("Error fetching emissions:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/api/achievements")
+      .then((res) => res.json())
+      .then((data) => setAchievements(data))
+      .catch((err) => console.error("Error fetching achievements:", err));
+  }, []);
+
   return (
     <div className="dashboard">
       <aside className="sidebar">
         <h2>GreenPath</h2>
-        <ul>
-          <li>Dashboard</li>
-          <li>Log Activity</li>
-          <li>AI Insights</li>
-          <li>Predictions</li>
-          <li>Community</li>
-          <li>Logout</li>
-        </ul>
+        <nav className="nav">
+          <ul className="nav-links">
+            <li><button onClick={() => console.log("Go to Dashboard")}>Dashboard</button></li>
+            <li><button onClick={() => console.log("Go to Log Activity")}>Log Activity</button></li>
+            <li><button onClick={() => console.log("Go to AI Insights")}>AI Insights</button></li>
+            <li><button onClick={() => console.log("Go to Predictions")}>Predictions</button></li>
+            <li><button onClick={() => console.log("Go to Community")}>Community</button></li>
+          </ul>
+          <div className="logout">
+            <button onClick={() => console.log("Logging out...")}>Logout</button>
+          </div>
+        </nav>
       </aside>
 
       <main className="main">
@@ -30,19 +52,12 @@ export default function Dashboard() {
             </div>
             <div className="note">{weeklyEmissions.length} days tracked</div>
           </div>
-          <div className="card">
-            <h4>This Month</h4>
-            <div className="value">313.90 kg CO₂</div>
-            <div className="note">Target: 1000 kg</div>
-          </div>
-          <div className="card">
-            <h4>Daily Average</h4>
-            <div className="value">13.19 kg CO₂</div>
-            <div className="note">24 activities logged</div>
-          </div>
+
           <div className="card">
             <h4>Achievements</h4>
-            <div className="value">{achievements.filter(a => a.unlocked).length} / {achievements.length}</div>
+            <div className="value">
+              {achievements.filter((a) => a.unlocked).length} / {achievements.length}
+            </div>
             <div className="note">Keep going!</div>
           </div>
         </section>
@@ -51,28 +66,21 @@ export default function Dashboard() {
           <div className="chart">
             <h4>Weekly Emissions</h4>
             <div className="bars">
-              {weeklyEmissions.map((day) => {
-                const rawHeight = day.emission * 2;
-                const height = `${Math.max(Math.min(rawHeight, 100), 4)}%`;
-                return (
-                  <div className="bar" key={day.day}>
-                    <div className="bar-fill" style={{ height }}></div>
-                    <small>{day.day}</small>
-                  </div>
-                );
-              })}
+              {weeklyEmissions.length > 0 ? (
+                weeklyEmissions.map(({ day, emission }) => {
+                  const height = `${Math.max(emission * 6, 10)}%`; 
+                  return (
+                    <div className="bar" key={day}>
+                      <small>{emission.toFixed(1)} kg</small>
+                      <div className="bar-fill" style={{ height }}></div>
+                      <small>{day}</small>
+                    </div>
+                  );
+                })
+              ) : (
+                <p>No emissions data available</p>
+              )}
             </div>
-          </div>
-
-          <div className="chart">
-            <h4>Emissions by Category</h4>
-            <ul className="pie-list">
-              {categoryEmissions.map((cat) => (
-                <li key={cat.category}>
-                  {cat.category}: {cat.value} kg
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 
@@ -94,5 +102,4 @@ export default function Dashboard() {
     </div>
   );
 }
-
 
