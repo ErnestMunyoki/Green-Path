@@ -4,6 +4,7 @@ import "./Dashboard.css";
 export default function Dashboard() {
   const [weeklyEmissions, setWeeklyEmissions] = useState([]);
   const [achievements, setAchievements] = useState([]);
+  const [aiInsights, setAiInsights] = useState(""); // ✅ NEW: AI insights state
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/emissions/weekly")
@@ -24,6 +25,20 @@ export default function Dashboard() {
       .then((data) => setAchievements(data))
       .catch((err) => console.error("Error fetching achievements:", err));
   }, []);
+
+  // ✅ NEW: Fetch AI insights after emissions are loaded
+  useEffect(() => {
+    if (weeklyEmissions.length > 0) {
+      fetch("http://127.0.0.1:5000/api/ai/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emissions: weeklyEmissions }),
+      })
+        .then((res) => res.json())
+        .then((data) => setAiInsights(data.insights))
+        .catch((err) => console.error("Error fetching AI insights:", err));
+    }
+  }, [weeklyEmissions]);
 
   return (
     <div className="dashboard">
@@ -84,6 +99,13 @@ export default function Dashboard() {
           </div>
         </section>
 
+        <section className="ai-insights">
+          <h3>AI Insights</h3>
+          <div className="card">
+            <p>{aiInsights || "Loading insights..."}</p>
+          </div>
+        </section>
+
         <section className="achievements">
           <h3>Your Achievements</h3>
           <div className="badge-grid">
@@ -102,4 +124,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
