@@ -1,67 +1,77 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ActivityForm() {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [emission, setEmission] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const [category, setCategory] = useState("");
+  const [emission, setEmission] = useState("");
+  const [date, setDate] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = { name, date, emission: parseFloat(emission) };
+    if (!category || !emission || !date) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
-    fetch("http://127.0.0.1:5000/api/activities", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert("✅ Activity logged!");
-        setName("");
-        setDate("");
-        setEmission("");
-      })
-      .catch((err) => {
-        console.error("Error logging activity:", err);
-        alert("❌ Failed to log activity.");
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category,
+          emission: parseFloat(emission),
+          date
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to log activity");
+      }
+
+      const data = await res.json();
+      alert(data.message || "Activity logged successfully!");
+      navigate("/");
+
+    } catch (err) {
+      console.error("Error logging activity:", err);
+      alert("Failed to log activity. Please try again.");
+    }
   };
 
   return (
-    <form className="activity-form" onSubmit={handleSubmit}>
-      <label>
-        Activity Name:
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </label>
+    <form onSubmit={handleSubmit}>
+      <h2>Log New Activity</h2>
 
-      <label>
-        Date:
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-      </label>
+      <label>Category:</label>
+      <input
+        type="text"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        placeholder="e.g. Transport"
+      />
 
-      <label>
-        Emission (kg CO₂):
-        <input
-          type="number"
-          step="0.01"
-          value={emission}
-          onChange={(e) => setEmission(e.target.value)}
-          required
-        />
-      </label>
+      <label>Date:</label>
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
+      />
 
-      <button type="submit">Log Activity</button>
+      <label>Emission (kg CO₂):</label>
+      <input
+        type="number"
+        value={emission}
+        onChange={(e) => setEmission(e.target.value)}
+        placeholder="e.g. 0.5"
+        step="0.01"
+        min="0"
+      />
+
+      <button type="submit" className="submit">Log Activity</button>
     </form>
   );
 }
+

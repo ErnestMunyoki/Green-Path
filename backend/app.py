@@ -18,7 +18,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
-CORS(app)
+
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 app.register_blueprint(activities_bp)
 app.register_blueprint(emissions_bp)
