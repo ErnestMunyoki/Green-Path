@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   const [weeklyEmissions, setWeeklyEmissions] = useState([]);
   const [achievements, setAchievements] = useState([]);
-  const [aiInsights, setAiInsights] = useState(""); // ✅ NEW: AI insights state
+  const [aiInsights, setAiInsights] = useState("");
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/emissions/weekly")
@@ -26,7 +29,6 @@ export default function Dashboard() {
       .catch((err) => console.error("Error fetching achievements:", err));
   }, []);
 
-  // ✅ NEW: Fetch AI insights after emissions are loaded
   useEffect(() => {
     if (weeklyEmissions.length > 0) {
       fetch("http://127.0.0.1:5000/api/ai/insights", {
@@ -46,11 +48,11 @@ export default function Dashboard() {
         <h2>GreenPath</h2>
         <nav className="nav">
           <ul className="nav-links">
-            <li><button onClick={() => console.log("Go to Dashboard")}>Dashboard</button></li>
-            <li><button onClick={() => console.log("Go to Log Activity")}>Log Activity</button></li>
-            <li><button onClick={() => console.log("Go to AI Insights")}>AI Insights</button></li>
-            <li><button onClick={() => console.log("Go to Predictions")}>Predictions</button></li>
-            <li><button onClick={() => console.log("Go to Community")}>Community</button></li>
+            <li><button onClick={() => navigate("/")}>Dashboard</button></li>
+            <li><button onClick={() => navigate("/log-activity")}>Log Activity</button></li>
+            <li><button onClick={() => navigate("/ai-insights")}>AI Insights</button></li>
+            <li><button onClick={() => navigate("/predictions")}>Predictions</button></li>
+            <li><button onClick={() => navigate("/community")}>Community</button></li>
           </ul>
           <div className="logout">
             <button onClick={() => console.log("Logging out...")}>Logout</button>
@@ -83,7 +85,7 @@ export default function Dashboard() {
             <div className="bars">
               {weeklyEmissions.length > 0 ? (
                 weeklyEmissions.map(({ day, emission }) => {
-                  const height = `${Math.max(emission * 6, 10)}%`; 
+                  const height = `${Math.max(emission * 6, 10)}%`;
                   return (
                     <div className="bar" key={day}>
                       <small>{emission.toFixed(1)} kg</small>
@@ -124,5 +126,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
 

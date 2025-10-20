@@ -5,7 +5,8 @@ from models import db
 from routes.activities import activities_bp
 from routes.emissions import emissions_bp
 from routes.achievements import achievements_bp
-from routes.ai import ai_bp 
+from routes.ai import ai_bp
+from routes.log_activity import log_activity_bp  
 
 os.makedirs("db", exist_ok=True)
 
@@ -22,7 +23,8 @@ CORS(app)
 app.register_blueprint(activities_bp)
 app.register_blueprint(emissions_bp)
 app.register_blueprint(achievements_bp)
-app.register_blueprint(ai_bp)  
+app.register_blueprint(ai_bp)
+app.register_blueprint(log_activity_bp)  
 
 @app.route("/")
 def home():
@@ -32,6 +34,7 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
 
 
