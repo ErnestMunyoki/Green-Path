@@ -171,6 +171,50 @@ body {
     padding: 24px;
   }
 }
+.activity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-buttons button {
+  padding: 8px 12px;
+  border: 1px solid #2e7d32;
+  background-color: white;
+  color: #2e7d32;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.category-buttons button.selected {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.quick-suggestions {
+  margin-top: 16px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggestion-list button {
+  background-color: #e0f2f1;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 
 
 
