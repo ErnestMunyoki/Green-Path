@@ -1,45 +1,52 @@
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_migrate import Migrate
+from extensions import db, migrate  
+def create_app():
+    app = Flask(__name__)
 
-from routes.activities import activities_bp
-from routes.emissions import emissions_bp
-from routes.achievements import achievements_bp
-from routes.ai import ai_bp
-from routes.log_activity import log_activity_bp
+    # Ensure db folder exists
+    os.makedirs("db", exist_ok=True)
 
-# Ensure db folder exists
-os.makedirs("db", exist_ok=True)
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    DB_PATH = os.path.join(BASE_DIR, "db", "database.db")
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(BASE_DIR, "db", "database.db")
+    # Database config
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-app = Flask(__name__)
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-# Database config
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    # Import blueprints AFTER init
+    from routes.activities import activities_bp
+    from routes.emissions import emissions_bp
+    from routes.achievements import achievements_bp
+    from routes.ai import ai_bp
+    from routes.log_activity import log_activity_bp
+    from routes.community import community_bp
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+    # Register blueprints
+    app.register_blueprint(activities_bp)
+    app.register_blueprint(emissions_bp)
+    app.register_blueprint(achievements_bp)
+    app.register_blueprint(ai_bp)
+    app.register_blueprint(log_activity_bp)
+    app.register_blueprint(community_bp)
 
-# Allow frontend (React) access
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+    # Enable CORS
+    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"], supports_credentials=True)
 
-# Register routes
-app.register_blueprint(activities_bp)
-app.register_blueprint(emissions_bp)
-app.register_blueprint(achievements_bp)
-app.register_blueprint(ai_bp)
-app.register_blueprint(log_activity_bp)
+    @app.route("/")
+    def home():
+        return "🌿 GreenPath backend is running!"
 
-@app.route("/")
-def home():
-    return "🌿 GreenPath backend is running!"
+    return app
+
 
 if __name__ == "__main__":
+    app = create_app()
     with app.app_context():
         db.create_all()
     app.run(debug=True)

@@ -1,11 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import date, datetime
+from extensions import db  
 
-db = SQLAlchemy()
-
-# ------------------------
-# 🌱 Activity & Achievement Models
-# ------------------------
 
 class Activity(db.Model):
     __tablename__ = "activities"
@@ -28,11 +23,6 @@ class Achievement(db.Model):
 
     def __repr__(self):
         return f"<Achievement {self.title}: {'Unlocked' if self.unlocked else 'Locked'}>"
-
-
-# ------------------------
-# 💬 Community Models
-# ------------------------
 
 class Post(db.Model):
     __tablename__ = "posts"
