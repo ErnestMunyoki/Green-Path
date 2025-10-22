@@ -1,12 +1,14 @@
-import os
+zimport os
 from flask import Flask
 from flask_cors import CORS
 from models import db
 from routes.activities import activities_bp
 from routes.emissions import emissions_bp
 from routes.achievements import achievements_bp
-from routes.ai import ai_bp 
+from routes.ai_insights import ai_bp
 
+
+# Create the database directory if it doesn't exist
 os.makedirs("db", exist_ok=True)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +24,7 @@ CORS(app)
 app.register_blueprint(activities_bp)
 app.register_blueprint(emissions_bp)
 app.register_blueprint(achievements_bp)
-app.register_blueprint(ai_bp)  
+app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
 @app.route("/")
 def home():
@@ -31,7 +33,5 @@ def home():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
-
-
-
+    
+    app.run(host="127.0.0.1", port=5000, debug=True)
