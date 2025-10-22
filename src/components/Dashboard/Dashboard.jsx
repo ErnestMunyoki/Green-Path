@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 export default function Dashboard() {
-  const [weeklyEmissions, setWeeklyEmissions] = useState([]);
-  const [achievements, setAchievements] = useState([]);
-  const [aiInsights, setAiInsights] = useState(""); // AI insights state
+  const navigate = useNavigate();
 
+  const [weeklyEmissions, setWeeklyEmissions] = useState([]);
+  const [monthlyStats, setMonthlyStats] = useState({
+    week_emissions: 0,
+    month_emissions: 0,
+    daily_average: 0,
+    activity_count: 0,
+  });
+  const [achievements, setAchievements] = useState([]);
+  const [aiInsights, setAiInsights] = useState("");
+
+  // Fetch weekly emissions
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/emissions/weekly")
       .then((res) => res.json())
@@ -19,6 +29,15 @@ export default function Dashboard() {
       .catch((err) => console.error("Error fetching emissions:", err));
   }, []);
 
+  // Fetch monthly stats
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/api/stats")
+      .then((res) => res.json())
+      .then((data) => setMonthlyStats(data))
+      .catch((err) => console.error("Error fetching monthly stats:", err));
+  }, []);
+
+  // Fetch achievements
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/achievements")
       .then((res) => res.json())
@@ -26,6 +45,7 @@ export default function Dashboard() {
       .catch((err) => console.error("Error fetching achievements:", err));
   }, []);
 
+  // Fetch AI insights based on weekly emissions
   useEffect(() => {
     if (weeklyEmissions.length > 0) {
       fetch("http://127.0.0.1:5000/api/ai/insights", {
@@ -39,37 +59,46 @@ export default function Dashboard() {
     }
   }, [weeklyEmissions]);
 
+  // Clear all data handler
+  const handleClearAllData = async () => {
+    const confirmClear = window.confirm("Clear all emissions and activity data?");
+    if (!confirmClear) return;
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+      alert(data.message || "Data cleared successfully!");
+
+      // Reset frontend state
+      setWeeklyEmissions([]);
+      setMonthlyStats({
+        week_emissions: 0,
+        month_emissions: 0,
+        daily_average: 0,
+        activity_count: 0,
+      });
+      setAiInsights("");
+    } catch (err) {
+      console.error("Error clearing data:", err);
+      alert("Failed to clear data.");
+    }
+  };
+
   return (
     <div className="dashboard">
       <aside className="sidebar">
         <h2>GreenPath</h2>
         <nav className="nav">
           <ul className="nav-links">
-            <li>
-              <button onClick={() => console.log("Go to Dashboard")}>
-                Dashboard
-              </button>
-            </li>
-            <li>
-              <button onClick={() => console.log("Go to Log Activity")}>
-                Log Activity
-              </button>
-            </li>
-            <li>
-              <button onClick={() => console.log("Go to AI Insights")}>
-                AI Insights
-              </button>
-            </li>
-            <li>
-              <button onClick={() => console.log("Go to Predictions")}>
-                Predictions
-              </button>
-            </li>
-            <li>
-              <button onClick={() => console.log("Go to Community")}>
-                Community
-              </button>
-            </li>
+            <li><button onClick={() => navigate("/")}>Dashboard</button></li>
+            <li><button onClick={() => navigate("/log-activity")}>Log Activity</button></li>
+            <li><button onClick={() => navigate("/ai-insights")}>AI Insights</button></li>
+            <li><button onClick={() => navigate("/predictions")}>Predictions</button></li>
+            <li><button onClick={() => navigate("/community")}>Community</button></li>
           </ul>
           <div className="logout">
             <button onClick={() => console.log("Logging out...")}>Logout</button>
@@ -81,19 +110,22 @@ export default function Dashboard() {
         <section className="summary">
           <div className="card">
             <h4>This Week</h4>
-            <div className="value">
-              {weeklyEmissions
-                .reduce((acc, d) => acc + d.emission, 0)
-                .toFixed(2)}{" "}
-              kg CO₂
+            <div className="value">{monthlyStats.week_emissions} kg CO₂</div>
+          </div>
+
+          <div className="card">
+            <h4>This Month</h4>
+            <div className="value">{monthlyStats.month_emissions} kg CO₂</div>
+            <div className="note">
+              Daily Avg: {monthlyStats.daily_average} kg CO₂<br />
+              {monthlyStats.activity_count} activities logged
             </div>
-            <div className="note">{weeklyEmissions.length} days tracked</div>
           </div>
 
           <div className="card">
             <h4>Achievements</h4>
             <div className="value">
-              {achievements.filter((a) => a.unlocked).length} / {achievements.length}
+              {achievements.filter(a => a.unlocked).length} / {achievements.length}
             </div>
             <div className="note">Keep going!</div>
           </div>
@@ -131,7 +163,7 @@ export default function Dashboard() {
         <section className="achievements">
           <h3>Your Achievements</h3>
           <div className="badge-grid">
-            {achievements.map((badge) => (
+            {achievements.map(badge => (
               <div
                 key={badge.title}
                 className={`badge ${badge.unlocked ? "unlocked" : "locked"}`}
@@ -141,6 +173,12 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="clear-section">
+          <button className="clear-data" onClick={handleClearAllData}>
+            🧹 Clear All Data
+          </button>
         </section>
       </main>
     </div>
