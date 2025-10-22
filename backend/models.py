@@ -4,7 +4,7 @@ from datetime import date, datetime
 db = SQLAlchemy()
 
 # ------------------------
-# 🌱 Activity & Achievement Models (your version)
+# 🌱 Activity & Achievement Models
 # ------------------------
 
 class Activity(db.Model):
@@ -31,7 +31,7 @@ class Achievement(db.Model):
 
 
 # ------------------------
-# 💬 Community Models (remote version)
+# 💬 Community Models
 # ------------------------
 
 class Post(db.Model):

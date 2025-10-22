@@ -2,16 +2,13 @@ from flask import request, jsonify
 from app import app, db
 from models import Post, Comment
 
-# ---------------------------
-# Get all posts
-# ---------------------------
 @app.route("/api/posts", methods=["GET"])
 def get_posts():
     posts = Post.query.order_by(Post.created_at.desc()).all()
     return jsonify([
         {
             "id": p.id,
-            "author": p.author,  # 👈 include author
+            "author": p.author,  
             "content": p.content,
             "category": p.category,
             "likes": p.likes,
@@ -19,7 +16,7 @@ def get_posts():
             "comments": [
                 {
                     "id": c.id,
-                    "author": c.author,  # 👈 include author
+                    "author": c.author,  
                     "content": c.content,
                     "created_at": c.created_at.strftime("%b %d, %Y %H:%M"),
                 }
@@ -29,10 +26,6 @@ def get_posts():
         for p in posts
     ]), 200
 
-
-# ---------------------------
-# Create a post
-# ---------------------------
 @app.route("/api/posts", methods=["POST"])
 def create_post():
     data = request.get_json()
@@ -40,20 +33,16 @@ def create_post():
         return jsonify({"error": "Content is required"}), 400
 
     post = Post(
-        author=data.get("author", "Anonymous"),   # ✅ include author
+        author=data.get("author", "Anonymous"),  
         content=data["content"],
-        category=data.get("category", "General")   # ✅ consistent category casing
+        category=data.get("category", "General")   
     )
 
     db.session.add(post)
     db.session.commit()
 
-    # ✅ Return full post details so React can render it immediately
     return jsonify(post.to_dict()), 201
 
-# ---------------------------
-# Like a post
-# ---------------------------
 @app.route("/api/posts/<int:id>/like", methods=["POST"])
 def like_post(id):
     post = Post.query.get_or_404(id)
@@ -62,9 +51,6 @@ def like_post(id):
     return jsonify({"likes": post.likes}), 200
 
 
-# ---------------------------
-# Delete a post
-# ---------------------------
 @app.route("/api/posts/<int:id>", methods=["DELETE"])
 def delete_post(id):
     post = Post.query.get_or_404(id)
@@ -72,14 +58,9 @@ def delete_post(id):
     db.session.commit()
     return jsonify({"message": "Post deleted"}), 200
 
-
-# ---------------------------
-# Add a comment
-# ---------------------------
 @app.route("/api/posts/<int:id>/comments", methods=["POST", "OPTIONS"])
 def add_comment(id):
     if request.method == "OPTIONS":
-        # Preflight request response
         return "", 200
 
     data = request.get_json()
@@ -92,9 +73,6 @@ def add_comment(id):
     return jsonify({"message": "Comment added", "comment_id": comment.id}), 201
 
 
-# ---------------------------
-# Delete a comment
-# ---------------------------
 @app.route("/api/comments/<int:id>", methods=["DELETE"])
 def delete_comment(id):
     comment = Comment.query.get_or_404(id)

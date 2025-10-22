@@ -37,7 +37,7 @@ app.register_blueprint(log_activity_bp)
 
 @app.route("/")
 def home():
-    return "GreenPath backend is running!"
+    return "🌿 GreenPath backend is running!"
 
 if __name__ == "__main__":
     with app.app_context():
