@@ -15,42 +15,44 @@ function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(true); // ✅ loading state
   const navigate = useNavigate();
 
+  // ✅ Check Firebase auth state once on load
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            name: user.displayName || "User",
-            email: user.email,
-            photo: user.photoURL,
-          })
-        );
-        navigate("/dashboard");
+        const userData = {
+          name: user.displayName || "User",
+          email: user.email,
+          photo: user.photoURL,
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        navigate("/dashboard", { replace: true });
+      } else {
+        setLoading(false); // ✅ only show login UI if no user
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
+  // ✅ Handle Email/Password Login or Register
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      if (!email || !password) {
-        alert("Please fill in all fields.");
-        return;
-      }
+    if (!email || !password) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
+    try {
       let userCredential;
       if (isLogin) {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log("Login successful");
       } else {
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log("Registration successful");
       }
 
       const user = userCredential.user;
@@ -63,7 +65,7 @@ function Login() {
         })
       );
 
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Authentication error:", error);
       switch (error.code) {
@@ -88,6 +90,7 @@ function Login() {
     }
   };
 
+  // ✅ Google Login
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -102,14 +105,14 @@ function Login() {
         })
       );
 
-      console.log("Google login successful:", user.displayName);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Google login error:", error);
       alert("Google login failed. Please try again.");
     }
   };
 
+  // ✅ GitHub Login
   const handleGithubLogin = async () => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
@@ -124,14 +127,25 @@ function Login() {
         })
       );
 
-      console.log("GitHub login successful:", user.displayName);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("GitHub login error:", error);
       alert("GitHub login failed. Please try again.");
     }
   };
 
+  // ✅ Show loading state before Firebase confirms
+  if (loading) {
+    return (
+      <div className="app-container">
+        <div className="login-card">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Main Login UI
   return (
     <div className="app-container">
       <div className="login-card">
@@ -186,13 +200,11 @@ function Login() {
 
         <div className="social-buttons">
           <button className="google-btn" onClick={handleGoogleLogin}>
-            <FcGoogle size={20} />
-            Google
+            <FcGoogle size={20} /> Google
           </button>
 
           <button className="github-btn" onClick={handleGithubLogin}>
-            <FaGithub size={20} />
-            GitHub
+            <FaGithub size={20} /> GitHub
           </button>
         </div>
       </div>

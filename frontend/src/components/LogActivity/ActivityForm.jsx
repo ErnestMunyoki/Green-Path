@@ -32,7 +32,7 @@ export default function ActivityForm() {
   ];
 
   const estimateEmission = async (desc) => {
-    const res = await fetch("http://127.0.0.1:5000/api/estimate-emission", {
+    const res = await fetch("http://127.0.0.1:5000/api/activities/estimate-emission", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: desc }),
@@ -90,22 +90,24 @@ export default function ActivityForm() {
 
     try {
       for (const activity of activities) {
-        const res = await fetch("http://127.0.0.1:5000/api/activities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            category: activity.category,
-            emission: activity.emission,
-            date: activity.date,
-          }),
-        });
+       const res = await fetch("http://127.0.0.1:5000/api/log-activity", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    user_id: 1,              
+    name: activity.category,  
+    duration: 30              
+  }),
+});
+
+
 
         if (!res.ok) {
           throw new Error("Failed to log activity");
         }
       }
 
-      alert(`✅ Activities logged!\nTotal emissions: ${totalEmission.toFixed(2)} kg CO₂`);
+      alert(` Activities logged!\nTotal emissions: ${totalEmission.toFixed(2)} kg CO₂`);
       navigate("/");
 
     } catch (err) {
@@ -147,7 +149,7 @@ export default function ActivityForm() {
       />
 
       <button type="button" className="add-activity" onClick={handleAddOrUpdateActivity}>
-        {editingIndex !== null ? "Update Activity" : "➕ Add Activity"}
+        {editingIndex !== null ? "Update Activity" : " Add Activity"}
       </button>
 
       <div className="quick-suggestions">
@@ -165,7 +167,7 @@ export default function ActivityForm() {
                 })
               }
             >
-              ➕ {suggestion}
+               {suggestion}
             </button>
           ))}
         </div>
@@ -177,8 +179,8 @@ export default function ActivityForm() {
           {activities.map((activity, index) => (
             <li key={index}>
               {activity.category}: {activity.description || "(no description)"} on {activity.date} — {activity.emission.toFixed(2)} kg CO₂
-              <button onClick={() => handleEdit(index)}>✏️ Edit</button>
-              <button onClick={() => handleRemove(index)}>🗑️ Remove</button>
+              <button onClick={() => handleEdit(index)}> Edit</button>
+              <button onClick={() => handleRemove(index)}>Remove</button>
             </li>
           ))}
         </ul>

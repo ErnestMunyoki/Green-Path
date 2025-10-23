@@ -1,37 +1,44 @@
-import openai
-import os
 from flask import Blueprint, request, jsonify
+from models import Activity, db
+from services.ai_insights import AIInsightsService
+from datetime import datetime
 
-ai_bp = Blueprint("ai", __name__, url_prefix="/api")
+# Define Blueprint
+ai_bp = Blueprint("ai", __name__, url_prefix="/api/ai")
 
-@ai_bp.route("/estimate-emission", methods=["POST"])
+@ai_bp.route("/estimate-emission", methods=["POST", "OPTIONS"])
 def estimate_emission():
-    try:
-        data = request.get_json()
-        description = data.get("description")
+    # Handle preflight CORS request
+    if request.method == "OPTIONS":
+        return "", 200
 
-        if not description:
-            return jsonify({"error": "Missing activity description"}), 400
+    data = request.get_json()
 
-        description = description.lower()
-        emission = 0.0
+    # ✅ Extract data from request
+    name = data.get("name", "").strip() or "Unknown activity"
+    user_id = data.get("user_id", 1)
+    distance_km = float(data.get("distance_km", 0))
+    vehicle_type = data.get("vehicle_type", "other")
 
-        if "car" in description and "10km" in description:
-            emission = 2.3
-        elif "bus" in description and "15km" in description:
-            emission = 1.1
-        elif "train" in description and "20km" in description:
-            emission = 0.8
-        elif "walk" in description or "bike" in description:
-            emission = 0.0
-        elif "flight" in description:
-            emission = 90.0
-        else:
-            emission = 5.0  
+    # ✅ Generate AI-based insight
+    result = AIInsightsService.generate_insight(
+        activity_name=name,
+        distance_km=distance_km,
+        vehicle_type=vehicle_type
+    )
 
-        return jsonify({"emission": emission}), 200
+    # ✅ Save activity in database
+    new_activity = Activity(
+        user_id=user_id,
+        name=result["activity"],
+        category="custom",
+        emission=result["emission"],
+        problem=result["problem"],
+        solution=result["solution"],
+        date=datetime.utcnow().date()
+    )
+    db.session.add(new_activity)
+    db.session.commit()
 
-    except Exception as e:
-        print("AI error:", e)
-        return jsonify({"error": "Internal server error"}), 500
-
+    # ✅ Return AI insight response to frontend
+    return jsonify(result), 201
