@@ -73,9 +73,17 @@ def add_comment(id):
     return jsonify({"message": "Comment added", "comment_id": comment.id}), 201
 
 
-@app.route("/api/comments/<int:id>", methods=["DELETE"])
-def delete_comment(id):
-    comment = Comment.query.get_or_404(id)
+
+@app.route("/api/posts/<int:post_id>/comments/<int:comment_id>", methods=["DELETE", "OPTIONS"])
+def delete_comment(post_id, comment_id):
+    
+    if request.method == "OPTIONS":
+        return "", 200
+
+    comment = Comment.query.filter_by(id=comment_id, post_id=post_id).first()
+    if not comment:
+        return jsonify({"error": "Comment not found"}), 404
+
     db.session.delete(comment)
     db.session.commit()
-    return jsonify({"message": "Comment deleted"}), 200
+    return jsonify({"message": "Comment deleted successfully"}), 200
