@@ -45,6 +45,7 @@ def create_app():
     from routes.community import community_bp
     from routes.stats import stats_bp
     from routes.clear_data import clear_data_bp  # ✅ NEW IMPORT
+    from routes.predictions import prediction_bp
 
     # ✅ Register Blueprints
     app.register_blueprint(activities_bp, url_prefix="/api/activities")
