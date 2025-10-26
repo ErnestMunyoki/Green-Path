@@ -4,9 +4,11 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from extensions import db
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 migrate = Migrate()
+
 
 def create_app():
     app = Flask(__name__)
@@ -21,10 +23,8 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # ✅ Enable CORS globally
     CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}}, supports_credentials=True)
 
-    # ✅ Import and register blueprints
     from routes.activities import activities_bp
     from routes.emissions import emissions_bp
     from routes.achievements import achievements_bp
