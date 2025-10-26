@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from extensions import db
-from dotenv import load_dotenv  # ✅ To load .env file
+from dotenv import load_dotenv 
 
 # ✅ Load environment variables
 load_dotenv()
@@ -44,7 +44,7 @@ def create_app():
     from routes.log_activity import log_activity_bp
     from routes.community import community_bp
     from routes.stats import stats_bp
-    from routes.clear_data import clear_data_bp  # ✅ NEW IMPORT
+    from routes.clear_data import clear_data_bp  
     from routes.predictions import prediction_bp
 
     # ✅ Register Blueprints
@@ -55,7 +55,7 @@ def create_app():
     app.register_blueprint(log_activity_bp, url_prefix="/api/")
     app.register_blueprint(community_bp, url_prefix="/api")
     app.register_blueprint(stats_bp)
-    app.register_blueprint(clear_data_bp)  # ✅ NEW REGISTRATION
+    app.register_blueprint(clear_data_bp)  
 
     @app.route("/")
     def home():
