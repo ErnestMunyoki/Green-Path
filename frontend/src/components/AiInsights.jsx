@@ -6,7 +6,7 @@ const AiInsights = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Load last AI insight from localStorage
+  // ✅ Load the most recent AI insight from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("latest_ai_insight");
     if (saved) {
@@ -14,20 +14,23 @@ const AiInsights = () => {
     }
   }, []);
 
+  // ✅ Fetch AI-generated sustainability insight (POST)
   const handleGenerateInsight = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // ✅ Use your real AI backend route
-      const response = await fetch("http://127.0.0.1:5000/api/log-activity", {
+      const response = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // 🧠 You can later replace this with real data from your activity log
         body: JSON.stringify({
-          category: "Commuting",
-          emission: 0.3,
-          date: "2025-10-24",
-          description: "Boiled water with charcoal",
+          name: "Car commute (10km)",
+          user_id: 1,
+          distance_km: 10,
+          vehicle_type: "petrol",
         }),
       });
 
@@ -35,7 +38,7 @@ const AiInsights = () => {
 
       const data = await response.json();
 
-      // ✅ Handle Gemini-style response
+      // ✅ Save and display the AI-generated insight
       setInsight(data);
       localStorage.setItem("latest_ai_insight", JSON.stringify(data));
     } catch (err) {
@@ -66,7 +69,7 @@ const AiInsights = () => {
       {insight && (
         <div className="insight-box">
           <h3>AI Insight</h3>
-          <p><strong>Activity:</strong> {insight.activity || "Boiled water with charcoal"}</p>
+          <p><strong>Activity:</strong> {insight.activity}</p>
           <p><strong>Emission:</strong> {insight.emission} kg CO₂</p>
           <p><strong>Problem:</strong> {insight.problem}</p>
           <p><strong>Recommendation:</strong> {insight.recommendation}</p>

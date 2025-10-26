@@ -4,7 +4,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Community from "./components/Community";
 import LogActivity from "./components/LogActivity/LogActivity";
 import Login from "./components/Login";
-import AiInsights from "./components/AiInsights"; // ✅ Import AI Insights
+import AiInsights from "./components/AiInsights";
 
 // ✅ Route guard for logged-in users
 function ProtectedRoute({ children }) {
@@ -17,26 +17,22 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    // Delay to ensure we read user data correctly before rendering routes
     const storedUser = localStorage.getItem("user");
     setUser(storedUser);
     setAuthChecked(true);
   }, []);
 
   if (!authChecked) {
-    // Prevent brief flash of login page before redirect
     return <div style={{ textAlign: "center", marginTop: "50px" }}>Loading...</div>;
   }
 
   return (
     <Router>
       <Routes>
-        {/* ✅ Default route (goes to login if not logged in) */}
+        {/* ✅ Default route → LOGIN first */}
         <Route
           path="/"
-          element={
-            user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-          }
+          element={<Navigate to="/login" replace />}
         />
 
         {/* ✅ Public route */}
@@ -70,7 +66,6 @@ function App() {
           }
         />
 
-        {/* ✅ AI Insights Route */}
         <Route
           path="/ai-insights"
           element={
@@ -81,7 +76,7 @@ function App() {
         />
 
         {/* ✅ Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );

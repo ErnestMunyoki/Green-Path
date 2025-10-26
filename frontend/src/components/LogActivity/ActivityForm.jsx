@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function ActivityForm() {
@@ -32,7 +32,22 @@ export default function ActivityForm() {
     { label: "Other", icon: "➕" },
   ];
 
-  // Fetch AI emission and insights from backend
+  // ✅ Load saved activities from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("activities");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setActivities(parsed);
+      const total = parsed.reduce((sum, act) => sum + (act.emission || 0), 0);
+      setTotalEmission(total);
+    }
+  }, []);
+
+  // ✅ Save to localStorage whenever activities change
+  useEffect(() => {
+    localStorage.setItem("activities", JSON.stringify(activities));
+  }, [activities]);
+
   const estimateEmission = async (activityDesc) => {
     setLoadingEmission(true);
     try {
@@ -46,7 +61,7 @@ export default function ActivityForm() {
 
       const data = await res.json();
       return {
-        emission: data.emission || 0,
+        emission: Number(data.emission) || 0,
         problem: data.problem || "No problem generated.",
         recommendation: data.recommendation || "No recommendation.",
         solution: data.solution || "No solution.",
@@ -72,14 +87,9 @@ export default function ActivityForm() {
     }
 
     const activityText = description || category;
-
-    // Call AI for this activity
     const aiData = await estimateEmission(activityText);
 
-    const newActivity = {
-      ...currentActivity,
-      ...aiData,
-    };
+    const newActivity = { ...currentActivity, ...aiData };
 
     let updatedActivities;
     if (editingIndex !== null) {
@@ -92,10 +102,7 @@ export default function ActivityForm() {
 
     setActivities(updatedActivities);
     setCurrentActivity({ category: "", description: "", date: "" });
-
-    // Update total emission
-    const newTotal = updatedActivities.reduce((sum, act) => sum + act.emission, 0);
-    setTotalEmission(newTotal);
+    setTotalEmission(updatedActivities.reduce((sum, act) => sum + (act.emission || 0), 0));
   };
 
   const handleEdit = (index) => {
@@ -106,47 +113,43 @@ export default function ActivityForm() {
   const handleRemove = (index) => {
     const updated = activities.filter((_, i) => i !== index);
     setActivities(updated);
-    const newTotal = updated.reduce((sum, act) => sum + act.emission, 0);
-    setTotalEmission(newTotal);
+    setTotalEmission(updated.reduce((sum, act) => sum + (act.emission || 0), 0));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (activities.length === 0) {
-    alert("Please add at least one activity.");
-    return;
-  }
-
-  try {
-    for (const activity of activities) {
-      console.log("Logging activity:", activity); // debug
-
-      const res = await fetch("http://127.0.0.1:5000/api/log-activity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: activity.description || activity.category,
-          category: activity.category,
-          date: activity.date,
-          distance_km: activity.distance_km || 0,
-          vehicle_type: activity.vehicle_type || "other",
-        }),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Failed to log activity: ${errText}`);
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (activities.length === 0) {
+      alert("Please add at least one activity.");
+      return;
     }
-    alert(`Activities logged!\nTotal emissions: ${totalEmission.toFixed(2)} kg CO₂`);
-    navigate("/");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to log activities. Please check console for details.");
-  }
-};
 
+    try {
+      for (const activity of activities) {
+        const res = await fetch("http://127.0.0.1:5000/api/log-activity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: activity.description || activity.category,
+            category: activity.category,
+            date: activity.date,
+            distance_km: activity.distance_km || 0,
+            vehicle_type: activity.vehicle_type || "other",
+          }),
+        });
 
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Failed to log activity: ${errText}`);
+        }
+      }
+
+      alert(`Activities logged!\nTotal emissions: ${totalEmission.toFixed(2)} kg CO₂`);
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to log activities. Please check console for details.");
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="activity-form">

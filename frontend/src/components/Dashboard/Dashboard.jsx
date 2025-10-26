@@ -80,23 +80,23 @@ export default function Dashboard() {
 
   
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to log out?");
-    if (!confirmLogout) return;
+  const confirmLogout = window.confirm("Are you sure you want to log out?");
+  if (!confirmLogout) return;
 
-    try {
-      await signOut(auth);
-      localStorage.clear();
-      sessionStorage.clear();
-      alert("You’ve been logged out successfully.");
-      navigate("/login", { replace: true });
-      window.location.reload();
-    } catch (error) {
-      console.error("Logout failed:", error);
-      alert("Failed to log out. Please try again.");
-    }
-  };
+  try {
+    await signOut(auth); // ✅ Firebase logout
+    localStorage.removeItem("user"); // ✅ Only clear user
+    sessionStorage.clear();
 
-  
+    alert("You’ve been logged out successfully.");
+
+    navigate("/login", { replace: true });
+  } catch (error) {
+    console.error("Logout failed:", error);
+    alert("Failed to log out. Please try again.");
+  }
+};
+
   const renderSection = () => {
     switch (activeSection) {
       case "dashboard":
