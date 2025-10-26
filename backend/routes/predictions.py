@@ -1,13 +1,13 @@
 import logging
 from flask import Blueprint, jsonify
 
-# Create and configure logger
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 prediction_bp = Blueprint("prediction_bp", __name__)
 
-# Sample data that your API returns
+
 sample_predictions = [
     {
         "activity": "Boiled water with charcoal",

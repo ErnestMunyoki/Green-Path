@@ -61,15 +61,16 @@
 }
 
 .status.improving {
-  color: #4caf50; /* green */
+  color: #4caf50; 
 }
 
 .status.above {
-  color: #f44336; /* red */
+  color: #f44336; 
 }
 
 .status.neutral {
-  color: #ff9800; /* orange */
+  color: #ff9800; 
+
 }
 
 .chart-section {

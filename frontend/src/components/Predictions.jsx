@@ -40,7 +40,7 @@ const Predictions = () => {
     fetchPredictions();
   }, []);
 
-  // compute stats dynamically
+  
   const totalEmission = predictions.reduce((sum, p) => sum + (p.emission || 0), 0);
   const avgEmission = predictions.length > 0 ? totalEmission / predictions.length : 0;
   const nextWeek = avgEmission * 7;
@@ -88,7 +88,7 @@ const Predictions = () => {
       <h2>Predictive Analytics</h2>
       <p className="subtitle">Machine learning–powered forecasts of your carbon footprint</p>
 
-      {/* Dynamic summary cards */}
+      
       <div className="summary-cards">
         <div className="card">
           <h3>Predicted Next Week</h3>
@@ -109,20 +109,20 @@ const Predictions = () => {
         </div>
       </div>
 
-      {/* Chart section */}
+      
       <div className="chart-section">
         <h4>7-Day Forecast</h4>
         <Line options={options} data={chartData} />
       </div>
 
-      {/* Prediction insight */}
+      
       <div className="prediction-insight">
         <strong>Prediction Insight:</strong> Based on your current trends, you are projected to emit about
         <span> {nextWeek.toFixed(1)} kg CO₂</span> next week. Try adopting cleaner transport or reducing energy use.
       </div>
 
       {loading && <p>Loading predictions...</p>}
-      {error && <p className="error">⚠️ {error}</p>}
+      {error && <p className="error">Not found⚠️ </p>}
     </div>
   );
 };
