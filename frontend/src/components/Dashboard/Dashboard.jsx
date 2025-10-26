@@ -4,7 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import Community from "../Community";
 import LogActivity from "../LogActivity/LogActivity";
-import AiInsights from "../AiInsights"; 
+import AiInsights from "../AiInsights";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -23,7 +23,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/emissions/weekly")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Weekly emissions route not found");
+        return res.json();
+      })
       .then((data) => {
         const formatted = Object.entries(data).map(([day, emission]) => ({
           day,
@@ -31,35 +34,47 @@ export default function Dashboard() {
         }));
         setWeeklyEmissions(formatted);
       })
-      .catch((err) => console.error("Error fetching emissions:", err));
+      .catch((err) => {
+        console.error("Error fetching emissions:", err);
+        alert("Failed to load weekly emissions. Check your backend.");
+      });
   }, []);
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/api/stats")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Stats route not found");
+        return res.json();
+      })
       .then((data) => setMonthlyStats(data))
-      .catch((err) => console.error("Error fetching monthly stats:", err));
+      .catch((err) => {
+        console.error("Error fetching monthly stats:", err);
+        alert("Failed to load monthly stats. Check your backend.");
+      });
   }, []);
 
-  
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/achievements")
-      .then((res) => res.json())
+    fetch("http://127.0.0.1:5000/api/achievements/all")
+      .then((res) => {
+        if (!res.ok) throw new Error("Achievements route not found");
+        return res.json();
+      })
       .then((data) => setAchievements(data))
-      .catch((err) => console.error("Error fetching achievements:", err));
+      .catch((err) => {
+        console.error("Error fetching achievements:", err);
+        alert("Failed to load achievements. Check your backend route.");
+      });
   }, []);
 
-  
   const handleClearAllData = async () => {
     const confirmClear = window.confirm("Clear all emissions and activity data?");
     if (!confirmClear) return;
 
     try {
       const res = await fetch("http://127.0.0.1:5000/api/clear", {
-  method: "DELETE", 
-  headers: { "Content-Type": "application/json" },
-});
-
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
       const data = await res.json();
       alert(data.message || "Data cleared successfully!");
@@ -78,7 +93,6 @@ export default function Dashboard() {
     }
   };
 
-  
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (!confirmLogout) return;
@@ -96,7 +110,6 @@ export default function Dashboard() {
     }
   };
 
-  
   const renderSection = () => {
     switch (activeSection) {
       case "dashboard":
@@ -158,21 +171,25 @@ export default function Dashboard() {
             <section className="achievements">
               <h3>Your Achievements</h3>
               <div className="badge-grid">
-                {achievements.map((badge) => (
-                  <div
-                    key={badge.title}
-                    className={`badge ${badge.unlocked ? "unlocked" : "locked"}`}
-                  >
-                    <h5>{badge.title}</h5>
-                    <p>{badge.unlocked ? "Unlocked" : "Locked"}</p>
-                  </div>
-                ))}
+                {achievements.length > 0 ? (
+                  achievements.map((badge) => (
+                    <div
+                      key={badge.id}
+                      className={`badge ${badge.unlocked ? "unlocked" : "locked"}`}
+                    >
+                      <h5>{badge.title}</h5>
+                      <p>{badge.unlocked ? "Unlocked" : "Locked"}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No achievements available yet.</p>
+                )}
               </div>
             </section>
 
             <section className="clear-section">
               <button className="clear-data" onClick={handleClearAllData}>
-                 Clear All Data
+                Clear All Data
               </button>
             </section>
           </>
@@ -182,7 +199,7 @@ export default function Dashboard() {
         return <LogActivity />;
 
       case "ai-insights":
-        return <AiInsights />; 
+        return <AiInsights />;
 
       case "predictions":
         return (

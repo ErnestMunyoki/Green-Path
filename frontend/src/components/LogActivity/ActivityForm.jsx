@@ -32,37 +32,41 @@ export default function ActivityForm() {
     { label: "Other", icon: "➕" },
   ];
 
-  // Fetch AI emission and insights from backend
   const estimateEmission = async (activityDesc) => {
-    setLoadingEmission(true);
-    try {
-      const res = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: activityDesc }),
-      });
+  setLoadingEmission(true);
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: activityDesc }),
+    });
 
-      if (!res.ok) throw new Error("Failed to fetch AI insight");
+    if (!res.ok) throw new Error("Failed to fetch AI insight");
 
-      const data = await res.json();
-      return {
-        emission: data.emission || 0,
-        problem: data.problem || "No problem generated.",
-        recommendation: data.recommendation || "No recommendation.",
-        solution: data.solution || "No solution.",
-      };
-    } catch (err) {
-      console.error("AI fetch failed:", err);
-      return {
-        emission: 0,
-        problem: "AI service unavailable.",
-        recommendation: "Try again later.",
-        solution: "Service temporarily unavailable.",
-      };
-    } finally {
-      setLoadingEmission(false);
-    }
-  };
+    const data = await res.json();
+    return {
+      emission: data.emission || 0,
+      problem: data.problem || "No problem generated.",
+      recommendation: data.recommendation || "No recommendation.",
+      solution: data.solution || "No solution.",
+      distance_km: data.distance_km || 0,
+      vehicle_type: data.vehicle_type || "other",
+    };
+  } catch (err) {
+    console.error("AI fetch failed:", err);
+    return {
+      emission: 0,
+      problem: "AI service unavailable.",
+      recommendation: "Try again later.",
+      solution: "Service temporarily unavailable.",
+      distance_km: 0,
+      vehicle_type: "other",
+    };
+  } finally {
+    setLoadingEmission(false);
+  }
+};
+
 
   const handleAddOrUpdateActivity = async () => {
     const { category, description, date } = currentActivity;
@@ -119,7 +123,7 @@ export default function ActivityForm() {
 
   try {
     for (const activity of activities) {
-      console.log("Logging activity:", activity); // debug
+      console.log("Logging activity:", activity); 
 
       const res = await fetch("http://127.0.0.1:5000/api/log-activity", {
         method: "POST",
@@ -128,8 +132,8 @@ export default function ActivityForm() {
           name: activity.description || activity.category,
           category: activity.category,
           date: activity.date,
-          distance_km: activity.distance_km || 0,
-          vehicle_type: activity.vehicle_type || "other",
+          distance_km: activity.distance_km,
+          vehicle_type: activity.vehicle_type,
         }),
       });
 
