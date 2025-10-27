@@ -4,7 +4,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import Community from "../Community";
 import LogActivity from "../LogActivity/LogActivity";
-import AiInsights from "../AiInsights"; 
+import AiInsights from "../AiInsights";
 import Predictions from "../Predictions";
 import "./Dashboard.css";
 
@@ -21,46 +21,47 @@ export default function Dashboard() {
   });
   const [achievements, setAchievements] = useState([]);
   const [aiInsights, setAiInsights] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const refreshDashboardData = async () => {
+    setLoading(true);
+    try {
+      const weeklyRes = await fetch("http://127.0.0.1:5000/api/emissions/weekly");
+      const weeklyData = await weeklyRes.json();
+      const formattedWeekly = Object.entries(weeklyData).map(([day, emission]) => ({
+        day,
+        emission,
+      }));
+      setWeeklyEmissions(formattedWeekly);
+
+      const statsRes = await fetch("http://127.0.0.1:5000/api/stats");
+      const statsData = await statsRes.json();
+      setMonthlyStats(statsData);
+
+      const achievementsRes = await fetch("http://127.0.0.1:5000/api/achievements")
+      const achievementsData = await achievementsRes.json();
+      setAchievements(achievementsData);
+    } catch (err) {
+      console.error("Error refreshing dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/emissions/weekly")
-      .then((res) => res.json())
-      .then((data) => {
-        const formatted = Object.entries(data).map(([day, emission]) => ({
-          day,
-          emission,
-        }));
-        setWeeklyEmissions(formatted);
-      })
-      .catch((err) => console.error("Error fetching emissions:", err));
+    refreshDashboardData();
   }, []);
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/stats")
-      .then((res) => res.json())
-      .then((data) => setMonthlyStats(data))
-      .catch((err) => console.error("Error fetching monthly stats:", err));
-  }, []);
 
-  
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/achievements")
-      .then((res) => res.json())
-      .then((data) => setAchievements(data))
-      .catch((err) => console.error("Error fetching achievements:", err));
-  }, []);
-
-  
   const handleClearAllData = async () => {
     const confirmClear = window.confirm("Clear all emissions and activity data?");
     if (!confirmClear) return;
 
     try {
       const res = await fetch("http://127.0.0.1:5000/api/clear", {
-  method: "DELETE", 
-  headers: { "Content-Type": "application/json" },
-});
-
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
       const data = await res.json();
       alert(data.message || "Data cleared successfully!");
@@ -73,30 +74,27 @@ export default function Dashboard() {
         activity_count: 0,
       });
       setAiInsights("");
+      setAchievements([]);
     } catch (err) {
       console.error("Error clearing data:", err);
       alert("Failed to clear data.");
     }
   };
-
-  
   const handleLogout = async () => {
-  const confirmLogout = window.confirm("Are you sure you want to log out?");
-  if (!confirmLogout) return;
+    const confirmLogout = window.confirm("Are you sure you want to log out?");
+    if (!confirmLogout) return;
 
-  try {
-    await signOut(auth); // ✅ Firebase logout
-    localStorage.removeItem("user"); // ✅ Only clear user
-    sessionStorage.clear();
-
-    alert("You’ve been logged out successfully.");
-
-    navigate("/login", { replace: true });
-  } catch (error) {
-    console.error("Logout failed:", error);
-    alert("Failed to log out. Please try again.");
-  }
-};
+    try {
+      await signOut(auth);
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+      alert("You’ve been logged out successfully.");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Failed to log out. Please try again.");
+    }
+  };
 
   const renderSection = () => {
     switch (activeSection) {
@@ -173,17 +171,19 @@ export default function Dashboard() {
 
             <section className="clear-section">
               <button className="clear-data" onClick={handleClearAllData}>
-                 Clear All Data
+                Clear All Data
               </button>
             </section>
+
+            {loading && <p style={{ textAlign: "center" }}>Updating dashboard...</p>}
           </>
         );
 
       case "log-activity":
-        return <LogActivity />;
+        return <LogActivity onActivityLogged={refreshDashboardData} />;
 
       case "ai-insights":
-        return <AiInsights />; 
+        return <AiInsights />;
 
       case "predictions":
         return <Predictions />;

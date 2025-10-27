@@ -32,7 +32,6 @@ export default function ActivityForm() {
     { label: "Other", icon: "➕" },
   ];
 
-  // ✅ Load saved activities from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("activities");
     if (saved) {
@@ -43,12 +42,10 @@ export default function ActivityForm() {
     }
   }, []);
 
-  // ✅ Save to localStorage whenever activities change
   useEffect(() => {
     localStorage.setItem("activities", JSON.stringify(activities));
   }, [activities]);
 
-  // ✅ Fetch AI emission estimation
   const estimateEmission = async (activityDesc) => {
     setLoadingEmission(true);
     try {
@@ -84,7 +81,6 @@ export default function ActivityForm() {
     }
   };
 
-  // ✅ Add or update activity
   const handleAddOrUpdateActivity = async () => {
     const { category, description, date } = currentActivity;
     if (!category || !date) {
@@ -122,7 +118,6 @@ export default function ActivityForm() {
     setTotalEmission(updated.reduce((sum, act) => sum + (act.emission || 0), 0));
   };
 
-  // ✅ Submit all activities to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (activities.length === 0) {

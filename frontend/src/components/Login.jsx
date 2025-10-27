@@ -15,10 +15,9 @@ function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true); // ✅ loading state
+  const [loading, setLoading] = useState(true); 
   const navigate = useNavigate();
 
-  // ✅ Check Firebase auth state once on load
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -31,14 +30,13 @@ function Login() {
         localStorage.setItem("user", JSON.stringify(userData));
         navigate("/dashboard", { replace: true });
       } else {
-        setLoading(false); // ✅ only show login UI if no user
+        setLoading(false); 
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // ✅ Handle Email/Password Login or Register
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,7 +88,6 @@ function Login() {
     }
   };
 
-  // ✅ Google Login
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -112,7 +109,6 @@ function Login() {
     }
   };
 
-  // ✅ GitHub Login
   const handleGithubLogin = async () => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
