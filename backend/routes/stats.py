@@ -1,18 +1,31 @@
+# backend/routes/stats.py
 from flask import Blueprint, jsonify
 from models import Activity
-from datetime import datetime, timedelta
+from extensions import db
 
-stats_bp = Blueprint("stats", __name__)
+stats_bp = Blueprint("stats_bp", __name__)
 
-@stats_bp.route("/api/stats", methods=["GET"])
-def get_monthly_stats():
-    today = datetime.today()
-    start = today - timedelta(days=30)  # last 30 days
-    activities = Activity.query.filter(Activity.date >= start).all()
+@stats_bp.route("/stats", methods=["GET"])
+def get_stats():
+    try:
+        # Fetch all activities from DB
+        activities = Activity.query.all()
 
-    result = {}
-    for activity in activities:
-        day = activity.date.strftime("%Y-%m-%d")
-        result[day] = result.get(day, 0) + activity.emission
+        total_emissions = sum(a.emission for a in activities)
+        total_activities = len(activities)
 
-    return jsonify(result)
+        # Example monthly breakdown
+        monthly_data = [
+            {"month": "Jan", "emissions": 20},
+            {"month": "Feb", "emissions": 35},
+            {"month": "Mar", "emissions": 25},
+        ]
+
+        return jsonify({
+            "total_emissions": total_emissions,
+            "total_activities": total_activities,
+            "monthly_data": monthly_data,
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

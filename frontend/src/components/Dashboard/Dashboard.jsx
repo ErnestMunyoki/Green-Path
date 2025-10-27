@@ -5,6 +5,8 @@ import "./Dashboard.css";
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const API_BASE = "http://127.0.0.1:5000/api";
+
   const [weeklyEmissions, setWeeklyEmissions] = useState([]);
   const [monthlyStats, setMonthlyStats] = useState({
     week_emissions: 0,
@@ -13,51 +15,45 @@ export default function Dashboard() {
     activity_count: 0,
   });
   const [achievements, setAchievements] = useState([]);
-  const [aiInsights, setAiInsights] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // Generic fetch helper
+  const fetchData = async (endpoint, setState) => {
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+      const data = await res.json();
+      setState(data);
+    } catch (err) {
+      console.error(`Error fetching ${endpoint}:`, err);
+    }
+  };
 
   // Fetch weekly emissions
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/emissions/weekly")
-      .then((res) => res.json())
-      .then((data) => {
-        const formatted = Object.entries(data).map(([day, emission]) => ({
-          day,
-          emission,
-        }));
-        setWeeklyEmissions(formatted);
-      })
-      .catch((err) => console.error("Error fetching emissions:", err));
+    fetchData("/emissions/weekly", (data) => {
+      const formatted = Object.entries(data).map(([day, emission]) => ({
+        day,
+        emission,
+      }));
+      setWeeklyEmissions(formatted);
+    });
   }, []);
 
   // Fetch monthly stats
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/stats")
-      .then((res) => res.json())
-      .then((data) => setMonthlyStats(data))
-      .catch((err) => console.error("Error fetching monthly stats:", err));
+    fetchData("/stats", setMonthlyStats);
   }, []);
 
   // Fetch achievements
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/achievements")
-      .then((res) => res.json())
-      .then((data) => setAchievements(data))
-      .catch((err) => console.error("Error fetching achievements:", err));
+    fetchData("/achievements/", setAchievements); // <-- Added trailing slash
+    setLoading(false);
   }, []);
-
-  // Fetch AI insights based on weekly emissions
-  useEffect(() => {
-    if (weeklyEmissions.length > 0) {
-      fetch("http://127.0.0.1:5000/api/ai/insights", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emissions: weeklyEmissions }),
-      })
-        .then((res) => res.json())
-        .then((data) => setAiInsights(data.insights || "No insights available"))
-        .catch((err) => console.error("Error fetching AI insights:", err));
-    }
-  }, [weeklyEmissions]);
 
   // Clear all data handler
   const handleClearAllData = async () => {
@@ -65,7 +61,7 @@ export default function Dashboard() {
     if (!confirmClear) return;
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/clear", {
+      const res = await fetch(`${API_BASE}/clear`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -73,7 +69,7 @@ export default function Dashboard() {
       const data = await res.json();
       alert(data.message || "Data cleared successfully!");
 
-      // Reset frontend state
+      // Reset all states
       setWeeklyEmissions([]);
       setMonthlyStats({
         week_emissions: 0,
@@ -81,12 +77,14 @@ export default function Dashboard() {
         daily_average: 0,
         activity_count: 0,
       });
-      setAiInsights("");
+      setAchievements([]);
     } catch (err) {
       console.error("Error clearing data:", err);
       alert("Failed to clear data.");
     }
   };
+
+  if (loading) return <p>Loading Dashboard...</p>;
 
   return (
     <div className="dashboard">
@@ -95,8 +93,8 @@ export default function Dashboard() {
         <nav className="nav">
           <ul className="nav-links">
             <li><button onClick={() => navigate("/")}>Dashboard</button></li>
-            <li><button onClick={() => navigate("/log-activity")}>Log Activity</button></li>
             <li><button onClick={() => navigate("/ai-insights")}>AI Insights</button></li>
+            <li><button onClick={() => navigate("/log-activity")}>Log Activity</button></li>
             <li><button onClick={() => navigate("/predictions")}>Predictions</button></li>
             <li><button onClick={() => navigate("/community")}>Community</button></li>
           </ul>
@@ -107,10 +105,12 @@ export default function Dashboard() {
       </aside>
 
       <main className="main">
+        {/* Summary Cards */}
         <section className="summary">
           <div className="card">
             <h4>This Week</h4>
             <div className="value">{monthlyStats.week_emissions} kg CO₂</div>
+            <div className="note">7 days tracked</div>
           </div>
 
           <div className="card">
@@ -131,13 +131,14 @@ export default function Dashboard() {
           </div>
         </section>
 
+        {/* Weekly Emissions Chart */}
         <section className="charts">
           <div className="chart">
             <h4>Weekly Emissions</h4>
             <div className="bars">
               {weeklyEmissions.length > 0 ? (
                 weeklyEmissions.map(({ day, emission }) => {
-                  const height = `${Math.max(emission * 6, 10)}%`;
+                  const height = `${Math.min(emission * 6, 100)}%`;
                   return (
                     <div className="bar" key={day}>
                       <small>{emission.toFixed(1)} kg</small>
@@ -153,28 +154,32 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="ai-insights">
-          <h3>AI Insights</h3>
-          <div className="card">
-            <p>{aiInsights || "Loading insights..."}</p>
-          </div>
-        </section>
-
+        {/* Achievements Section */}
         <section className="achievements">
           <h3>Your Achievements</h3>
           <div className="badge-grid">
-            {achievements.map(badge => (
-              <div
-                key={badge.title}
-                className={`badge ${badge.unlocked ? "unlocked" : "locked"}`}
-              >
-                <h5>{badge.title}</h5>
-                <p>{badge.unlocked ? "Unlocked" : "Locked"}</p>
-              </div>
-            ))}
+            {achievements.length > 0 ? (
+              achievements.map((badge) => (
+                <div
+                  key={badge.title}
+                  className={`badge ${badge.unlocked ? "unlocked" : "locked"}`}
+                >
+                  <div className="badge-header">
+                    <h5>{badge.title}</h5>
+                    <span className="status">
+                      {badge.unlocked ? "✅ Unlocked" : "🔒 Locked"}
+                    </span>
+                  </div>
+                  <p className="badge-description">{badge.description}</p>
+                </div>
+              ))
+            ) : (
+              <p>No achievements available yet.</p>
+            )}
           </div>
         </section>
 
+        {/* Clear All Data */}
         <section className="clear-section">
           <button className="clear-data" onClick={handleClearAllData}>
             🧹 Clear All Data
