@@ -4,16 +4,19 @@ import re
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Configure Gemini API
+# Configure the Google Generative AI client
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
 
 class AIInsightsService:
     @staticmethod
-    def generate_insight(activity_name: str, distance_km=0, vehicle_type="other"):
+    def generate_insight(activity_name: str, distance_km: float = 0, vehicle_type: str = "other"):
+        """
+        Generate sustainability insights for a given activity using Google Gemini AI.
+        Returns a dictionary with keys: activity, emission, problem, recommendation, solution
+        """
+
         prompt = f"""
         You are a sustainability assistant.
 
@@ -31,19 +34,17 @@ class AIInsightsService:
         Vehicle Type: {vehicle_type}
         """
 
-        for attempt in range(2):  # Retry once if parsing fails
+        for attempt in range(2):
             try:
-                # ✅ Correct model name and version
+                # Use the latest Gemini model
                 model = genai.GenerativeModel("models/gemini-2.5-flash")
-
-                # Generate the AI insight
                 response = model.generate_content(prompt)
                 ai_text = response.text.strip()
 
-                # Remove any Markdown code fences (```json ... ```)
+                # Remove markdown code blocks if present
                 ai_text_clean = re.sub(r"^```json|```$", "", ai_text.strip(), flags=re.MULTILINE).strip()
 
-                # Parse JSON from AI output
+                # Parse JSON
                 data = json.loads(ai_text_clean)
 
                 return {
@@ -55,10 +56,11 @@ class AIInsightsService:
                 }
 
             except (json.JSONDecodeError, KeyError, ValueError):
-                # Try to recover if JSON was malformed
+                # Retry once
                 if attempt == 0:
-                    continue  # Retry once
+                    continue
 
+                # Fallback parsing for emission
                 emission_match = re.search(r"(\d+(\.\d+)?)\s*kg", ai_text)
                 emission_value = float(emission_match.group(1)) if emission_match else 0.0
                 return {
@@ -70,7 +72,7 @@ class AIInsightsService:
                 }
 
             except Exception as e:
-                # Catch any API or network errors
+                # Catch-all fallback
                 print("⚠️ Gemini error:", e)
                 return {
                     "activity": activity_name,

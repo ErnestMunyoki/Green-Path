@@ -2,7 +2,7 @@ import json
 import requests
 import time
 
-API_KEY = "AIzaSyBoLwUnBbEro4lmnNLoUp7KUrIYQ8jQbzQ"  # Your Google AI API key
+API_KEY = "AIzaSyBoLwUnBbEro4lmnNLoUp7KUrIYQ8jQbzQ"  
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent"
 GEMINI_API_PREDICT_URL = f"{GEMINI_API_URL}?key={API_KEY}"
 

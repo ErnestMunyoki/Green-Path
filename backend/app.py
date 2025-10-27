@@ -16,14 +16,22 @@ def create_app():
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DB_PATH = os.path.join(BASE_DIR, "db", "database.db")
 
+    # ✅ Database configuration
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # ✅ Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
 
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}}, supports_credentials=True)
+    # ✅ Enable CORS for frontend
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}},
+        supports_credentials=True,
+    )
 
+    # ✅ Import and register routes
     from routes.activities import activities_bp
     from routes.emissions import emissions_bp
     from routes.achievements import achievements_bp
@@ -34,22 +42,23 @@ def create_app():
     from routes.clear_data import clear_data_bp
     from routes.predictions import prediction_bp  
 
+    # ✅ Register all Blueprints (no duplicate prefixes)
     app.register_blueprint(activities_bp, url_prefix="/api/activities")
     app.register_blueprint(emissions_bp, url_prefix="/api/emissions")
     app.register_blueprint(achievements_bp, url_prefix="/api/achievements")
     app.register_blueprint(ai_bp, url_prefix="/api/ai")
     app.register_blueprint(log_activity_bp, url_prefix="/api")
-    app.register_blueprint(community_bp, url_prefix="/api")
-    app.register_blueprint(stats_bp, url_prefix="/api")
-    app.register_blueprint(clear_data_bp, url_prefix="/api")
-    
+    app.register_blueprint(community_bp, url_prefix="/api/community")
+    app.register_blueprint(stats_bp, url_prefix="/api/stats")
+    app.register_blueprint(clear_data_bp, url_prefix="/api/clear")
     app.register_blueprint(prediction_bp, url_prefix="/api/predictions")
 
     @app.route("/")
     def home():
-        return "🌿 GreenPath backend is running with AI support!"
+        return "🌿 GreenPath backend is running with AI, stats, and emissions tracking!"
 
     return app
+
 
 if __name__ == "__main__":
     app = create_app()
