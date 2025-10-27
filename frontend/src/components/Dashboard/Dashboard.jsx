@@ -5,6 +5,7 @@ import { auth } from "../../firebase";
 import Community from "../Community";
 import LogActivity from "../LogActivity/LogActivity";
 import AiInsights from "../AiInsights"; 
+import Predictions from "../Predictions";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -185,12 +186,7 @@ export default function Dashboard() {
         return <AiInsights />; 
 
       case "predictions":
-        return (
-          <section className="predictions">
-            <h2>Future Emission Predictions</h2>
-            <p>Coming soon: machine learning-based prediction models!</p>
-          </section>
-        );
+        return <Predictions />;
 
       case "community":
         return <Community />;

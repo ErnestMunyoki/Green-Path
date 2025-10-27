@@ -29,13 +29,24 @@ export default function LogActivity() {
             <li><button onClick={() => navigate("/community")}>Community</button></li>
           </ul>
           <div className="logout">
+
             <button onClick={handleLogout}>Logout</button>
+            <button onClick={() => {
+              localStorage.clear();
+              sessionStorage.clear();
+              alert("Logged out successfully.");
+              navigate("/login", { replace: true });
+              window.location.reload();
+            }}>
+              Logout
+            </button>
           </div>
         </nav>
       </aside>
 
       <main className="main">
         <section className="form-panel">
+          <h3>Log a New Activity</h3>
           <ActivityForm />
         </section>
       </main>

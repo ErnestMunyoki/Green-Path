@@ -48,6 +48,7 @@ export default function ActivityForm() {
     localStorage.setItem("activities", JSON.stringify(activities));
   }, [activities]);
 
+  // ✅ Fetch AI emission estimation
   const estimateEmission = async (activityDesc) => {
     setLoadingEmission(true);
     try {
@@ -61,10 +62,12 @@ export default function ActivityForm() {
 
       const data = await res.json();
       return {
-        emission: Number(data.emission) || 0,
+        emission: data.emission || 0,
         problem: data.problem || "No problem generated.",
         recommendation: data.recommendation || "No recommendation.",
         solution: data.solution || "No solution.",
+        distance_km: data.distance_km || 0,
+        vehicle_type: data.vehicle_type || "other",
       };
     } catch (err) {
       console.error("AI fetch failed:", err);
@@ -73,12 +76,15 @@ export default function ActivityForm() {
         problem: "AI service unavailable.",
         recommendation: "Try again later.",
         solution: "Service temporarily unavailable.",
+        distance_km: 0,
+        vehicle_type: "other",
       };
     } finally {
       setLoadingEmission(false);
     }
   };
 
+  // ✅ Add or update activity
   const handleAddOrUpdateActivity = async () => {
     const { category, description, date } = currentActivity;
     if (!category || !date) {
@@ -116,6 +122,7 @@ export default function ActivityForm() {
     setTotalEmission(updated.reduce((sum, act) => sum + (act.emission || 0), 0));
   };
 
+  // ✅ Submit all activities to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (activities.length === 0) {
@@ -125,6 +132,8 @@ export default function ActivityForm() {
 
     try {
       for (const activity of activities) {
+        console.log("Logging activity:", activity);
+
         const res = await fetch("http://127.0.0.1:5000/api/log-activity", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

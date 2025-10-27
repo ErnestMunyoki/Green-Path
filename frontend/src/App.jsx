@@ -5,6 +5,9 @@ import Community from "./components/Community";
 import LogActivity from "./components/LogActivity/LogActivity";
 import Login from "./components/Login";
 import AiInsights from "./components/AiInsights";
+import AiInsights from "./components/AiInsights"; // ✅ Import AI Insights
+import Predictions from "./components/Predictions";
+
 
 // ✅ Route guard for logged-in users
 function ProtectedRoute({ children }) {
@@ -73,7 +76,19 @@ function App() {
               <AiInsights />
             </ProtectedRoute>
           }
+          
+
+          
         />
+        <Route
+  path="/predictions"
+  element={
+    <ProtectedRoute>
+      <Predictions />
+    </ProtectedRoute>
+  }
+/>
+
 
         {/* ✅ Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
