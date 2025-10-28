@@ -8,11 +8,22 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler // ✅ needed for fill: true
 } from "chart.js";
 import "./predictions.css";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+// ✅ Register all Chart.js components including Filler
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const Predictions = () => {
   const [predictions, setPredictions] = useState([]);
@@ -40,14 +51,20 @@ const Predictions = () => {
     fetchPredictions();
   }, []);
 
-  
+  // ✅ Calculate summary metrics safely
   const totalEmission = predictions.reduce((sum, p) => sum + (p.emission || 0), 0);
   const avgEmission = predictions.length > 0 ? totalEmission / predictions.length : 0;
   const nextWeek = avgEmission * 7;
   const nextMonth = avgEmission * 30;
 
-  const labels = predictions.length > 0 ? predictions.map(p => p.date) : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const emissions = predictions.length > 0 ? predictions.map(p => p.emission) : [12, 12.5, 13, 14.5, 13.8, 14, 13.9];
+  // ✅ Chart labels and data
+  const labels = predictions.length > 0
+    ? predictions.map(p => p.date)
+    : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const emissions = predictions.length > 0
+    ? predictions.map(p => p.emission || 0)
+    : [12, 12.5, 13, 14.5, 13.8, 14, 13.9];
 
   const chartData = {
     labels,
@@ -88,7 +105,7 @@ const Predictions = () => {
       <h2>Predictive Analytics</h2>
       <p className="subtitle">Machine learning–powered forecasts of your carbon footprint</p>
 
-      
+      {/* Summary Cards */}
       <div className="summary-cards">
         <div className="card">
           <h3>Predicted Next Week</h3>
@@ -109,20 +126,21 @@ const Predictions = () => {
         </div>
       </div>
 
-      
+      {/* Chart Section */}
       <div className="chart-section">
         <h4>7-Day Forecast</h4>
         <Line options={options} data={chartData} />
       </div>
 
-      
+      {/* Prediction Insight */}
       <div className="prediction-insight">
         <strong>Prediction Insight:</strong> Based on your current trends, you are projected to emit about
         <span> {nextWeek.toFixed(1)} kg CO₂</span> next week. Try adopting cleaner transport or reducing energy use.
       </div>
 
+      {/* Loading & Error */}
       {loading && <p>Loading predictions...</p>}
-      {error && <p className="error">Not found⚠️ </p>}
+      {error && <p className="error">Error: {error} ⚠️</p>}
     </div>
   );
 };

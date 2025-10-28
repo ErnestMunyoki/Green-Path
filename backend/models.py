@@ -1,5 +1,28 @@
-from datetime import date, datetime
+from datetime import datetime, date
 from extensions import db
+
+# -------------------------
+# USER MODEL
+# -------------------------
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+
+    activities = db.relationship(
+        "Activity", back_populates="user", cascade="all, delete-orphan"
+    )
+    achievements = db.relationship(
+        "Achievement", back_populates="user", cascade="all, delete-orphan"
+    )
+    posts = db.relationship(
+        "Post", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<User {self.username}>"
 
 
 # -------------------------
@@ -9,16 +32,18 @@ class Activity(db.Model):
     __tablename__ = "activities"
 
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(100), nullable=False, default="Uncategorized")
+    emission = db.Column(db.Float, nullable=True, default=0.0)
+    problem = db.Column(db.Text, nullable=True, default="No problem provided.")
+    solution = db.Column(db.Text, nullable=True, default="No solution provided.")
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), default="custom", nullable=False)
-    emission = db.Column(db.Float, nullable=False)
-    problem = db.Column(db.String(200))
-    solution = db.Column(db.String(200))
-    date = db.Column(db.Date, default=date.today, nullable=False)
+    user = db.relationship("User", back_populates="activities")
 
     def __repr__(self):
-        return f"<Activity {self.name} ({self.category}) on {self.date}: {self.emission} kg CO₂>"
+        return f"<Activity {self.name}>"
 
     def to_dict(self):
         return {
@@ -40,17 +65,27 @@ class Achievement(db.Model):
     __tablename__ = "achievements"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False, unique=True)
-    unlocked = db.Column(db.Boolean, default=False, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    badge_icon = db.Column(db.String(200), nullable=True)
+    date_awarded = db.Column(db.DateTime, nullable=True)
+
+    threshold_type = db.Column(db.String(50), nullable=True)
+    threshold_value = db.Column(db.Float, nullable=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    user = db.relationship("User", back_populates="achievements")
 
     def __repr__(self):
-        return f"<Achievement {self.title}: {'Unlocked' if self.unlocked else 'Locked'}>"
+        return f"<Achievement {self.title}>"
 
     def to_dict(self):
         return {
             "id": self.id,
             "title": self.title,
-            "unlocked": self.unlocked,
+            "description": self.description,
+            "badge_icon": self.badge_icon,
+            "date_awarded": self.date_awarded.isoformat() if self.date_awarded else None,
         }
 
 
@@ -61,30 +96,22 @@ class Post(db.Model):
     __tablename__ = "posts"
 
     id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.String(100), default="Anonymous", nullable=False)
     content = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50), default="General", nullable=False)
-    likes = db.Column(db.Integer, default=0, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    comments = db.relationship(
-        "Comment",
-        backref="post",
-        cascade="all, delete-orphan",
-        lazy=True
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("User", back_populates="posts")
+    comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"<Post {self.id} by {self.author}>"
+        return f"<Post {self.id}>"
 
     def to_dict(self):
         return {
             "id": self.id,
-            "author": self.author,
+            "user_id": self.user_id,
             "content": self.content,
-            "category": self.category,
-            "likes": self.likes,
-            "created_at": self.created_at.isoformat(),
+            "date_created": self.date_created.isoformat(),
             "comments": [comment.to_dict() for comment in self.comments],
         }
 
@@ -96,49 +123,23 @@ class Comment(db.Model):
     __tablename__ = "comments"
 
     id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.String(100), default="Anonymous", nullable=False)
     content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), nullable=False)
 
+    user = db.relationship("User")
+    post = db.relationship("Post", back_populates="comments")
+
     def __repr__(self):
-        return f"<Comment {self.id} by {self.author} on Post {self.post_id}>"
+        return f"<Comment {self.id}>"
 
     def to_dict(self):
         return {
             "id": self.id,
-            "author": self.author,
             "content": self.content,
-            "created_at": self.created_at.isoformat(),
-        }
-
-
-# -------------------------
-# USER MODEL
-# -------------------------
-class User(db.Model):
-    __tablename__ = "users"
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    activities = db.relationship(
-        "Activity",
-        backref="user",
-        lazy=True,
-        cascade="all, delete-orphan"
-    )
-
-    def __repr__(self):
-        return f"<User {self.username}>"
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "username": self.username,
-            "email": self.email,
-            "created_at": self.created_at.isoformat(),
+            "date_created": self.date_created.isoformat(),
+            "user_id": self.user_id,
+            "post_id": self.post_id,
         }

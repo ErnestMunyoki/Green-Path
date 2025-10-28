@@ -151,9 +151,10 @@ const Community = () => {
                     <p>{new Date(post.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <span className={`tag ${post.category.toLowerCase()}`}>
-                  {post.category}
-                </span>
+               <span className={`tag ${(post.category || "").toLowerCase()}`}>
+  {post.category || "Uncategorized"}
+</span>
+
               </div>
 
               <p className="post-content">{post.content}</p>

@@ -1,97 +1,61 @@
-// src/App.jsx
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-
-// Pages / Components
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Community from "./components/Community";
 import LogActivity from "./components/LogActivity/LogActivity";
 import Login from "./components/Login";
 import AiInsights from "./components/AiInsights";
 import Predictions from "./components/Predictions";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
-// Firebase
-import { auth } from "./firebase";                // your exported auth
-import { onAuthStateChanged } from "firebase/auth"; // import directly from Firebase SDK
-
-// Protected route wrapper
-function ProtectedRoute({ user, children }) {
-  return user ? children : <Navigate to="/login" replace />;
-}
-
-// Home redirect based on auth state
-function HomeRedirect({ user, authChecked }) {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authChecked) return;
-
-    if (user) navigate("/dashboard", { replace: true });
-    else navigate("/login", { replace: true });
-  }, [user, authChecked, navigate]);
-
-  return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      Loading...
-    </div>
-  );
-}
-
-function App() {
+export default function App() {
   const [user, setUser] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
+  // Listen for Firebase auth changes
   useEffect(() => {
-    // Listen to Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser({
-          uid: currentUser.uid,
-          email: currentUser.email,
-        });
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            uid: currentUser.uid,
-            email: currentUser.email,
-          })
-        );
-      } else {
-        setUser(null);
-        localStorage.removeItem("user");
-      }
-
-      setAuthChecked(true);
+      setUser(currentUser); // null if not logged in
+      setCheckingAuth(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (!authChecked) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        Loading...
-      </div>
-    );
-  }
+  // Show loading while checking auth
+  if (checkingAuth) return <p>Checking authentication...</p>;
+
+  // Protected Route wrapper
+  const ProtectedRoute = ({ children }) => {
+    if (!user) return <Navigate to="/login" replace />;
+    return children;
+  };
+
+  // Redirect logged-in user from login page
+  const PublicRoute = ({ children }) => {
+    if (user) return <Navigate to="/dashboard" replace />;
+    return children;
+  };
 
   return (
     <Router>
       <Routes>
-        {/* Home route */}
+        {/* Public login page */}
         <Route
-          path="/"
-          element={<HomeRedirect user={user} authChecked={authChecked} />}
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
         />
-
-        {/* Public login */}
-        <Route path="/login" element={<Login setUser={setUser} />} />
 
         {/* Protected routes */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -99,7 +63,7 @@ function App() {
         <Route
           path="/community"
           element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute>
               <Community />
             </ProtectedRoute>
           }
@@ -107,7 +71,7 @@ function App() {
         <Route
           path="/log-activity"
           element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute>
               <LogActivity />
             </ProtectedRoute>
           }
@@ -115,7 +79,7 @@ function App() {
         <Route
           path="/ai-insights"
           element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute>
               <AiInsights />
             </ProtectedRoute>
           }
@@ -123,17 +87,15 @@ function App() {
         <Route
           path="/predictions"
           element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute>
               <Predictions />
             </ProtectedRoute>
           }
         />
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Default route */}
+        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       </Routes>
     </Router>
   );
 }
-
-export default App;
