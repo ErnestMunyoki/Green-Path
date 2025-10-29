@@ -5,14 +5,14 @@ import "../App.css";
 const Community = () => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
-  const [category, setCategory] = useState("Tip");
-  const [commentText, setCommentText] = useState("");
+  const [category, setCategory] = useState("Tip"); // frontend only for display
+  const [commentText, setCommentText] = useState({}); // per-post comment input
   const [openComments, setOpenComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
 
   const API_BASE = "http://127.0.0.1:5000/api";
 
-  // ✅ Fetch posts
+  // Fetch posts
   const fetchPosts = async () => {
     try {
       const res = await axios.get(`${API_BASE}/posts`);
@@ -26,23 +26,23 @@ const Community = () => {
     fetchPosts();
   }, []);
 
-  // ✅ Create new post
+  // Create new post
   const handlePost = async () => {
     if (!newPost.trim()) return;
     try {
       await axios.post(`${API_BASE}/posts`, {
-        author: "EcoUser",
-        category,
         content: newPost,
+        user_id: 1, // default user
       });
       setNewPost("");
+      setCategory("Tip");
       fetchPosts();
     } catch (err) {
       console.error("Error posting:", err);
     }
   };
 
-  // ✅ Like post
+  // Like post
   const handleLike = async (id) => {
     try {
       const alreadyLiked = likedPosts.includes(id);
@@ -50,7 +50,7 @@ const Community = () => {
       setPosts((prev) =>
         prev.map((p) =>
           p.id === id
-            ? { ...p, likes: alreadyLiked ? p.likes - 1 : p.likes + 1 }
+            ? { ...p, likes: alreadyLiked ? (p.likes || 1) - 1 : (p.likes || 0) + 1 }
             : p
         )
       );
@@ -62,22 +62,24 @@ const Community = () => {
     }
   };
 
-  // ✅ Add comment
-  const handleComment = async (id) => {
-    if (!commentText.trim()) return;
+  // Add comment
+  const handleComment = async (postId) => {
+    const text = commentText[postId];
+    if (!text?.trim()) return;
+
     try {
-      await axios.post(`${API_BASE}/posts/${id}/comments`, {
-        author: "EcoUser",
-        content: commentText,
+      await axios.post(`${API_BASE}/posts/${postId}/comments`, {
+        content: text,
+        user_id: 1,
       });
-      setCommentText("");
+      setCommentText((prev) => ({ ...prev, [postId]: "" }));
       fetchPosts();
     } catch (err) {
       console.error("Error posting comment:", err);
     }
   };
 
-  // ✅ Delete post
+  // Delete post
   const handleDeletePost = async (id) => {
     try {
       await axios.delete(`${API_BASE}/posts/${id}`);
@@ -87,7 +89,7 @@ const Community = () => {
     }
   };
 
-  // ✅ Delete comment
+  // Delete comment
   const handleDeleteComment = async (postId, commentId) => {
     try {
       await axios.delete(`${API_BASE}/posts/${postId}/comments/${commentId}`);
@@ -97,7 +99,7 @@ const Community = () => {
     }
   };
 
-  // ✅ Toggle comments
+  // Toggle comments visibility
   const toggleComments = (id) => {
     setOpenComments((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -109,7 +111,7 @@ const Community = () => {
         <p>Post a milestone, tip, or question to inspire others 🌍</p>
       </div>
 
-      {/* ✏️ Create Post */}
+      {/* Create Post */}
       <div className="post-creator">
         <textarea
           placeholder="What sustainability insight would you like to share?"
@@ -132,7 +134,7 @@ const Community = () => {
         </button>
       </div>
 
-      {/* 🧾 Posts Section */}
+      {/* Posts Section */}
       <div className="posts-list">
         {posts.length === 0 ? (
           <p className="no-posts">No posts yet. Be the first to share 🌱</p>
@@ -147,23 +149,18 @@ const Community = () => {
                     className="avatar"
                   />
                   <div>
-                    <h4>{post.author}</h4>
-                    <p>{new Date(post.created_at).toLocaleDateString()}</p>
+                    <h4>{post.user?.username || "EcoUser"}</h4>
+                    <p>{new Date(post.date_created).toLocaleDateString()}</p>
                   </div>
                 </div>
-               <span className={`tag ${(post.category || "").toLowerCase()}`}>
-  {post.category || "Uncategorized"}
-</span>
-
+                <span className={`tag ${category.toLowerCase()}`}>{category}</span>
               </div>
 
               <p className="post-content">{post.content}</p>
 
               <div className="post-actions">
                 <button
-                  className={`like-btn ${
-                    likedPosts.includes(post.id) ? "liked" : ""
-                  }`}
+                  className={`like-btn ${likedPosts.includes(post.id) ? "liked" : ""}`}
                   onClick={() => handleLike(post.id)}
                 >
                   <i
@@ -173,7 +170,7 @@ const Community = () => {
                         : "fa-regular fa-heart"
                     }
                   ></i>{" "}
-                  {post.likes}
+                  {post.likes || 0}
                 </button>
 
                 <button onClick={() => toggleComments(post.id)}>
@@ -185,7 +182,6 @@ const Community = () => {
                   <i className="fa-solid fa-share"></i> Share
                 </button>
 
-                {/* ✅ Text-based Delete button */}
                 <button
                   className="delete-post"
                   onClick={() => handleDeletePost(post.id)}
@@ -194,18 +190,20 @@ const Community = () => {
                 </button>
               </div>
 
-              {/* 💬 Comments */}
+              {/* Comments Section */}
               {openComments[post.id] && (
                 <div className="comments-section">
                   {post.comments?.map((c) => (
                     <div key={c.id} className="comment-card">
                       <div className="comment-info">
-                        <strong>{c.author}</strong>
+                        <strong>{c.user?.username || "EcoUser"}</strong>
                         <p>{c.content}</p>
                       </div>
                       <button
                         className="delete-comment"
-                        onClick={() => handleDeleteComment(post.id, c.id)}
+                        onClick={() =>
+                          handleDeleteComment(post.id, c.id)
+                        }
                       >
                         Delete
                       </button>
@@ -216,8 +214,13 @@ const Community = () => {
                     <input
                       type="text"
                       placeholder="Write a comment..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
+                      value={commentText[post.id] || ""}
+                      onChange={(e) =>
+                        setCommentText((prev) => ({
+                          ...prev,
+                          [post.id]: e.target.value,
+                        }))
+                      }
                     />
                     <button onClick={() => handleComment(post.id)}>
                       Comment

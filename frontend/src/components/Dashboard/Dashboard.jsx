@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import Community from "../Community";
@@ -8,8 +8,9 @@ import AiInsights from "../AiInsights";
 import Predictions from "../Predictions";
 import "./Dashboard.css";
 
-export default function Dashboard() {
+export default function Dashboard({ currentUser }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeSection, setActiveSection] = useState("dashboard");
   const [weeklyEmissions, setWeeklyEmissions] = useState([]);
@@ -25,11 +26,11 @@ export default function Dashboard() {
 
   const API_BASE = "http://127.0.0.1:5000/api";
 
-  // --- Refresh dashboard data ---
+  // 🔁 Refresh dashboard data
   const refreshDashboardData = async () => {
     setLoading(true);
     try {
-      // 1. Weekly emissions
+      
       const weeklyRes = await fetch(`${API_BASE}/stats/weekly-emissions`);
       const weeklyData = await weeklyRes.json();
       const formattedWeekly = Object.entries(weeklyData).map(([day, emission]) => ({
@@ -38,7 +39,6 @@ export default function Dashboard() {
       }));
       setWeeklyEmissions(formattedWeekly);
 
-      // 2. Overall / monthly stats
       const statsRes = await fetch(`${API_BASE}/stats/`);
       const statsData = await statsRes.json();
       setMonthlyStats({
@@ -48,12 +48,10 @@ export default function Dashboard() {
         activity_count: statsData.total_activities,
       });
 
-      // 3. Achievements
       const achievementsRes = await fetch(`${API_BASE}/achievements/`);
       const achievementsData = await achievementsRes.json();
       setAchievements(achievementsData);
 
-      // 4. Activities list
       const activitiesRes = await fetch(`${API_BASE}/activities/`);
       const activitiesData = await activitiesRes.json();
       setActivities(activitiesData);
@@ -66,42 +64,37 @@ export default function Dashboard() {
 
   useEffect(() => {
     refreshDashboardData();
-  }, []);
+  }, [location]);
+const handleClearAllData = async () => {
+  if (!window.confirm("Clear all emissions and activity data?")) return;
 
-  // --- Clear all data ---
-  const handleClearAllData = async () => {
-    const confirmClear = window.confirm("Clear all emissions and activity data?");
-    if (!confirmClear) return;
+  try {
+    const res = await fetch(`${API_BASE}/activities/clear`, {  // <-- updated URL
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
 
-    try {
-      const res = await fetch(`${API_BASE}/clear`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      alert(data.message || "Data cleared successfully!");
+    if (!res.ok) throw new Error("Failed to clear data");
 
-      // Reset states
-      setWeeklyEmissions([]);
-      setMonthlyStats({
-        week_emissions: 0,
-        month_emissions: 0,
-        daily_average: 0,
-        activity_count: 0,
-      });
-      setAchievements([]);
-      setActivities([]);
-    } catch (err) {
-      console.error("Error clearing data:", err);
-      alert("Failed to clear data.");
-    }
-  };
+    const data = await res.json();
+    alert(data.message || "Data cleared successfully!");
+    setWeeklyEmissions([]);
+    setMonthlyStats({
+      week_emissions: 0,
+      month_emissions: 0,
+      daily_average: 0,
+      activity_count: 0,
+    });
+    setAchievements([]);
+    setActivities([]);
+  } catch (err) {
+    console.error("Error clearing data:", err);
+    alert("Failed to clear data.");
+  }
+};
 
-  // --- Logout ---
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to log out?");
-    if (!confirmLogout) return;
-
+    if (!window.confirm("Are you sure you want to log out?")) return;
     try {
       await signOut(auth);
       localStorage.removeItem("user");
@@ -114,13 +107,11 @@ export default function Dashboard() {
     }
   };
 
-  // --- Section rendering ---
   const renderSection = () => {
     switch (activeSection) {
       case "dashboard":
         return (
           <>
-            {/* Summary */}
             <section className="summary">
               <div className="card">
                 <h4>This Week</h4>
@@ -149,16 +140,16 @@ export default function Dashboard() {
                 <h4>Weekly Emissions</h4>
                 <div className="bars">
                   {weeklyEmissions.length > 0 ? (
-                    weeklyEmissions.map(({ day, emission }) => {
-                      const height = `${Math.min(emission * 6, 100)}%`;
-                      return (
-                        <div className="bar" key={day}>
-                          <small>{emission.toFixed(1)} kg</small>
-                          <div className="bar-fill" style={{ height }}></div>
-                          <small>{day}</small>
-                        </div>
-                      );
-                    })
+                    weeklyEmissions.map(({ day, emission }) => (
+                      <div className="bar" key={day}>
+                        <small>{emission.toFixed(1)} kg</small>
+                        <div
+                          className="bar-fill"
+                          style={{ height: `${Math.min(emission * 6, 100)}%` }}
+                        ></div>
+                        <small>{day}</small>
+                      </div>
+                    ))
                   ) : (
                     <p>No emissions data available</p>
                   )}
@@ -166,7 +157,7 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* Recent Activities */}
+            {/* Activities List */}
             <section className="activity-list">
               <h3>Recent Activities</h3>
               {activities.length > 0 ? (
@@ -195,37 +186,38 @@ export default function Dashboard() {
                       <div className="badge-header">
                         <h5>{badge.title}</h5>
                         <span className="status">
-                          {badge.unlocked ? "✅ Unlocked" : "🔒 Locked"}
+                          {badge.unlocked ? " Unlocked" : " Locked"}
                         </span>
                       </div>
                       <p className="badge-description">{badge.description}</p>
                     </div>
                   ))
                 ) : (
-                  <p>No achievements available yet.</p>
+                  <p>No achievements yet.</p>
                 )}
               </div>
             </section>
 
-            {/* Clear Data */}
             <section className="clear-section">
               <button className="clear-data" onClick={handleClearAllData}>
-                🧹 Clear All Data
+                 Clear All Data
               </button>
             </section>
-
-            {loading && <p style={{ textAlign: "center" }}>Updating dashboard...</p>}
           </>
         );
 
       case "log-activity":
-        return <LogActivity onActivityLogged={refreshDashboardData} />;
+        return <LogActivity currentUser={currentUser} onActivityLogged={refreshDashboardData} />;
+
       case "ai-insights":
-        return <AiInsights />;
+        return <AiInsights currentUser={currentUser} />;
+
       case "predictions":
-        return <Predictions />;
+        return <Predictions currentUser={currentUser} />;
+
       case "community":
-        return <Community />;
+        return <Community currentUser={currentUser} />;
+
       default:
         return <p>Section not found.</p>;
     }

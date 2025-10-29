@@ -27,7 +27,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Enable global CORS for your frontend
+    # Enable global CORS for frontend
     CORS(
         app,
         resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}},
@@ -40,16 +40,18 @@ def create_app():
     from routes.ai import ai_bp
     from routes.activities import activities_bp
     from routes.stats import stats_bp
-    from routes.achievements import achievements_bp  # <-- import achievements
+    from routes.achievements import achievements_bp
+    from routes.predictions import predictions_bp  # <- import predictions
 
     app.register_blueprint(community_bp)
     app.register_blueprint(emissions_bp)
     app.register_blueprint(ai_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(stats_bp)
-    app.register_blueprint(achievements_bp)  # <-- register achievements
+    app.register_blueprint(achievements_bp)
+    app.register_blueprint(predictions_bp)  # <- register predictions
 
-    # Basic home route to check if backend is running
+    # Basic home route
     @app.route("/")
     def home():
         return "🌿 GreenPath backend is running!"
@@ -60,5 +62,5 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     with app.app_context():
-        db.create_all()  # Make sure database tables exist
+        db.create_all()  # Ensure database tables exist
     app.run(debug=True, host="127.0.0.1", port=5000)

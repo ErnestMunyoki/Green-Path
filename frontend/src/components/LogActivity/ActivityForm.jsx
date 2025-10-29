@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function ActivityForm({ onActivityLogged }) {
+export default function ActivityForm({ currentUser, onActivityLogged }) {
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [currentActivity, setCurrentActivity] = useState({
@@ -22,7 +22,7 @@ export default function ActivityForm({ onActivityLogged }) {
     { label: "Other", icon: "➕" },
   ];
 
-  // Load saved activities from localStorage on mount
+  // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("activities");
     if (saved) {
@@ -32,26 +32,25 @@ export default function ActivityForm({ onActivityLogged }) {
     }
   }, []);
 
-  // Save activities to localStorage whenever they change
+  // Save to localStorage whenever activities change
   useEffect(() => {
     localStorage.setItem("activities", JSON.stringify(activities));
+    setTotalEmission(activities.reduce((sum, a) => sum + (a.emission || 0), 0));
   }, [activities]);
 
-  // AI emission estimate
-  const estimateEmission = async (activityDesc) => {
+  const estimateEmission = async (activityName) => {
     setLoadingEmission(true);
     try {
       const res = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: activityDesc }),
+        body: JSON.stringify({ name: activityName }),
       });
       if (!res.ok) throw new Error("AI service error");
       const data = await res.json();
       return {
         emission: data.emission ?? 0,
         problem: data.problem || "No problem generated.",
-        recommendation: data.recommendation || "No recommendation.",
         solution: data.solution || "No solution provided.",
         distance_km: data.distance_km ?? 0,
         vehicle_type: data.vehicle_type || "other",
@@ -61,7 +60,6 @@ export default function ActivityForm({ onActivityLogged }) {
       return {
         emission: 0,
         problem: "AI service unavailable.",
-        recommendation: "Try again later.",
         solution: "Service temporarily unavailable.",
         distance_km: 0,
         vehicle_type: "other",
@@ -71,11 +69,10 @@ export default function ActivityForm({ onActivityLogged }) {
     }
   };
 
-  // Add or update activity
   const handleAddOrUpdateActivity = async () => {
     const { category, description, date } = currentActivity;
-    if (!description && !category) {
-      alert("Enter a description or select a category.");
+    if (!category) {
+      alert("Please select a category first.");
       return;
     }
 
@@ -83,7 +80,12 @@ export default function ActivityForm({ onActivityLogged }) {
     const activityDate = date || new Date().toISOString().split("T")[0];
     const aiData = await estimateEmission(name);
 
-    const newActivity = { ...currentActivity, name, date: activityDate, ...aiData };
+    const newActivity = {
+      ...currentActivity,
+      name,
+      date: activityDate,
+      ...aiData,
+    };
 
     const updatedActivities =
       editingIndex !== null
@@ -93,80 +95,82 @@ export default function ActivityForm({ onActivityLogged }) {
     setActivities(updatedActivities);
     setEditingIndex(null);
     setCurrentActivity({ category: "", description: "", date: "" });
-    setTotalEmission(updatedActivities.reduce((sum, a) => sum + (a.emission || 0), 0));
   };
 
-  // Edit activity
   const handleEdit = (index) => {
     setCurrentActivity(activities[index]);
     setEditingIndex(index);
   };
 
-  // Remove activity
   const handleRemove = (index) => {
     const updated = activities.filter((_, i) => i !== index);
     setActivities(updated);
-    setTotalEmission(updated.reduce((sum, a) => sum + (a.emission || 0), 0));
   };
 
-  // Submit all activities to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Log Activity Button Clicked");
+    console.log("Current user:", currentUser);
+
+   if (!currentUser?.uid) {
+  alert("User not logged in!");
+  return;
+}
+
+
     if (activities.length === 0) {
-      alert("Add at least one activity.");
+      alert("Add at least one activity before logging.");
       return;
     }
 
     try {
       await Promise.all(
-        activities.map((activity) =>
-          fetch("http://127.0.0.1:5000/api/activities/log-activity", {
+        activities.map((activity) => {
+          const payload = {
+  name: activity.name,
+  category: activity.category,
+  description: activity.description,
+  date: activity.date || new Date().toISOString().split("T")[0],
+  user_id: currentUser.uid,
+  emission: activity.emission || 0,
+  problem: activity.problem || "No problem provided.",
+  solution: activity.solution || "No solution provided."
+};
+
+
+          console.log("Sending activity:", payload);
+
+          return fetch("http://127.0.0.1:5000/api/activities/log-activity", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: activity.name,
-              category: activity.category || "Uncategorized",
-              date: activity.date,
-              emission: activity.emission ?? 0,
-              distance_km: activity.distance_km ?? 0,
-              vehicle_type: activity.vehicle_type || "other",
-              problem: activity.problem || "",
-              solution: activity.solution || "",
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error("Failed to log activity");
-            return res.json();
+            body: JSON.stringify(payload),
           })
-        )
+            .then(async (res) => {
+              const data = await res.json();
+              console.log("Response from backend:", data);
+              if (!res.ok) throw new Error(data.error || "Failed to log activity");
+              return data;
+            })
+            .catch((err) => console.error("Error logging activity:", err));
+        })
       );
 
       if (onActivityLogged) onActivityLogged();
 
       alert(`Activities logged!\nTotal emissions: ${totalEmission.toFixed(2)} kg CO₂`);
-
-      // Clear activities locally and in localStorage
       setActivities([]);
       setTotalEmission(0);
       localStorage.removeItem("activities");
-
-      navigate("/"); // back to dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Failed to log activities. Check console.");
+      alert("Failed to log activities. Check console for details.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="activity-form">
-      <h2>Log Any Activity</h2>
-
-      <label>Description:</label>
-      <input
-        type="text"
-        value={currentActivity.description}
-        onChange={(e) => setCurrentActivity({ ...currentActivity, description: e.target.value })}
-        placeholder="e.g. Drove 10km, Cooked dinner..."
-      />
+      <h2>Log Your Activity</h2>
 
       <label>Category:</label>
       <div className="category-buttons">
@@ -182,23 +186,43 @@ export default function ActivityForm({ onActivityLogged }) {
         ))}
       </div>
 
+      <label>Description:</label>
+      <input
+        type="text"
+        value={currentActivity.description}
+        onChange={(e) =>
+          setCurrentActivity({ ...currentActivity, description: e.target.value })
+        }
+        placeholder="e.g. Drove 10km, Cooked dinner..."
+      />
+
       <label>Date:</label>
       <input
         type="date"
         value={currentActivity.date}
-        onChange={(e) => setCurrentActivity({ ...currentActivity, date: e.target.value })}
+        onChange={(e) =>
+          setCurrentActivity({ ...currentActivity, date: e.target.value })
+        }
       />
 
-      <button type="button" onClick={handleAddOrUpdateActivity} disabled={loadingEmission}>
-        {loadingEmission ? "Calculating..." : editingIndex !== null ? "Update Activity" : "Add Activity"}
+      <button
+        type="button"
+        onClick={handleAddOrUpdateActivity}
+        disabled={loadingEmission}
+      >
+        {loadingEmission
+          ? "Calculating..."
+          : editingIndex !== null
+          ? "Update Activity"
+          : "Add Activity"}
       </button>
 
       <h3>Activities</h3>
       <ul>
         {activities.map((activity, i) => (
           <li key={i}>
-            <strong>{activity.name}</strong> ({activity.category || "Uncategorized"}) on {activity.date} —{" "}
-            {activity.emission.toFixed(2)} kg CO₂
+            <strong>{activity.name}</strong> ({activity.category}) —{" "}
+            {activity.date} — {activity.emission.toFixed(2)} kg CO₂
             <button type="button" onClick={() => handleEdit(i)}>Edit</button>
             <button type="button" onClick={() => handleRemove(i)}>Remove</button>
             <div>
@@ -209,7 +233,10 @@ export default function ActivityForm({ onActivityLogged }) {
         ))}
       </ul>
 
-      <div><strong>Total Emissions:</strong> {totalEmission.toFixed(2)} kg CO₂</div>
+      <div>
+        <strong>Total Emissions:</strong> {totalEmission.toFixed(2)} kg CO₂
+      </div>
+
       <button type="submit">Log All Activities</button>
     </form>
   );
