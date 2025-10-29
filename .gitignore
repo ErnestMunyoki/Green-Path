@@ -1,6 +1,6 @@
 venv/
 .venv/
-backend/venv/
+backend/ven/
 backend/.venv/
 
 __pycache__/
