@@ -17,7 +17,7 @@ google-auth==2.41.1
 google-auth-httplib2==0.2.0
 googleapis-common-protos==1.71.0
 grpcio==1.76.0
-grpcio-status==1.71.2
+grpcio-status>=1.71.1
 proto-plus==1.26.1
 protobuf==5.29.5
 openai==2.4.0
