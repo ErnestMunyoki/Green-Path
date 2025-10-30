@@ -96,21 +96,14 @@ Copy code
    }, supports_credentials=True)
 Environment Variables
 
-Add any API keys (e.g. GOOGLE_API_KEY) in Render → Environment → Add Environment Variable.
 
 🔹 Frontend (Vercel)
 Base URL Configuration
 
 Replace all local API URLs (e.g., http://127.0.0.1:5000) with:
 
-arduino
-Copy code
 https://green-path.onrender.com
-Alternatively, create a .env file or use Vercel Environment Variables:
 
-ini
-Copy code
-VITE_API_BASE_URL=https://green-path.onrender.com
 Build Settings
 
 Framework: Vite (React)
@@ -146,6 +139,8 @@ ini
 Copy code
 VITE_API_BASE_URL=https://green-path.onrender.com
 VITE_FIREBASE_API_KEY=your_firebase_key
+
+
 👥 Collaborators
 Name	Role
 Ernest Munyoki	Full-Stack Developer
@@ -158,14 +153,10 @@ This project is licensed under the MIT License — feel free to use and improve 
 
 "Small actions make a big impact — start your green path today." 🌱
 
-yaml
-Copy code
-
 ---
 
-Would you like me to make this version **downloadable as a README.md file** so you can directly add it to your GitHub repo?
 
-2/2
+
 
 
 
