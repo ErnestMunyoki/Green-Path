@@ -10,7 +10,7 @@ const Community = () => {
   const [openComments, setOpenComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
 
-  const API_BASE = "http://127.0.0.1:5000/api";
+  const API_BASE = "https://green-path.onrender.com/api";
 
   // Fetch posts
   const fetchPosts = async () => {

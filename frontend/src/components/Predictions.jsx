@@ -35,7 +35,7 @@ const Predictions = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/predictions");
+        const response = await fetch("https://green-path.onrender.com/api/predictions");
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Failed to fetch predictions: ${response.statusText} — ${text}`);

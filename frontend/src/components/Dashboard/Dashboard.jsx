@@ -24,7 +24,7 @@ export default function Dashboard({ currentUser }) {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const API_BASE = "http://127.0.0.1:5000/api";
+  const API_BASE = "https://green-path.onrender.com/api";
 
   // 🔁 Refresh dashboard data
   const refreshDashboardData = async () => {

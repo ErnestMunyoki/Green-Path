@@ -20,7 +20,7 @@ const AiInsights = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
+      const response = await fetch("https://green-path.onrender.com/api/ai/estimate-emission", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
