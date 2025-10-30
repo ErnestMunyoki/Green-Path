@@ -30,7 +30,15 @@ def create_app():
     # Enable global CORS for frontend
     CORS(
         app,
-        resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}},
+        resources={
+        r"/api/*": {
+            "origins": [
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://green-path-pearl.vercel.app"
+            ]
+        }
+    },
         supports_credentials=True,
     )
 
