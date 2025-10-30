@@ -34,7 +34,7 @@ def get_overall_stats():
 
 # --- Weekly Emissions ---
 @stats_bp.route("/weekly-emissions", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://green-path.onrender.com"])
 def get_weekly_emissions():
     """
     Returns total CO₂ emissions for each day of the current week (Monday–Sunday).
