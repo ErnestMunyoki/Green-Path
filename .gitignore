@@ -13,3 +13,4 @@ __pycache__/
 .idea/
 .vscode/
 node_modules/
+backend/db/database.db

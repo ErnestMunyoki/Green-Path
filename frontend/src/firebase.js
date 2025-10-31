@@ -1,4 +1,4 @@
-// src/firebase.js
+
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -17,16 +17,13 @@ const firebaseConfig = {
   measurementId: "G-L04NTDZMMQ",
 };
 
-// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ✅ Only enable analytics in browser
 let analytics;
 if (typeof window !== "undefined") {
   analytics = getAnalytics(app);
 }
 
-// ✅ Setup Authentication
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();

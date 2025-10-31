@@ -26,7 +26,6 @@ export default function Dashboard({ currentUser }) {
 
   const API_BASE = "https://green-path.onrender.com/api";
 
-  // 🔁 Refresh dashboard data
   const refreshDashboardData = async () => {
     setLoading(true);
     try {
@@ -134,7 +133,6 @@ const handleClearAllData = async () => {
               </div>
             </section>
 
-            {/* Weekly Emissions Chart */}
             <section className="charts">
               <div className="chart">
                 <h4>Weekly Emissions</h4>
@@ -157,7 +155,6 @@ const handleClearAllData = async () => {
               </div>
             </section>
 
-            {/* Activities List */}
             <section className="activity-list">
               <h3>Recent Activities</h3>
               {activities.length > 0 ? (
@@ -173,7 +170,6 @@ const handleClearAllData = async () => {
               )}
             </section>
 
-            {/* Achievements */}
             <section className="achievements">
               <h3>Your Achievements</h3>
               <div className="badge-grid">

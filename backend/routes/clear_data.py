@@ -5,7 +5,11 @@ from models import db, Activity
 clear_data_bp = Blueprint("clear_data", __name__, url_prefix="/api")
 
 @clear_data_bp.route("/clear", methods=["DELETE", "OPTIONS"]) 
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def clear_data():
     if flask.request.method == "OPTIONS":
         return jsonify({"status": "OK"}), 200

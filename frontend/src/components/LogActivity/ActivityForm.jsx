@@ -14,15 +14,14 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
   const [loadingEmission, setLoadingEmission] = useState(false);
 
   const categories = [
-    { label: "Commuting", icon: "🚗" },
-    { label: "Meals", icon: "🍴" },
-    { label: "Energy", icon: "⚡" },
-    { label: "Shopping", icon: "🛒" },
-    { label: "Travel", icon: "🧳" },
-    { label: "Other", icon: "➕" },
+    { label: "Commuting", icon: "" },
+    { label: "Meals", icon: "" },
+    { label: "Energy", icon: "" },
+    { label: "Shopping", icon: "" },
+    { label: "Travel", icon: "" },
+    { label: "Other", icon: "" },
   ];
 
-  // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("activities");
     if (saved) {
@@ -32,7 +31,6 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
     }
   }, []);
 
-  // Save to localStorage whenever activities change
   useEffect(() => {
     localStorage.setItem("activities", JSON.stringify(activities));
     setTotalEmission(activities.reduce((sum, a) => sum + (a.emission || 0), 0));

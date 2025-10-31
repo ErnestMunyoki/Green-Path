@@ -5,14 +5,13 @@ import "../App.css";
 const Community = () => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
-  const [category, setCategory] = useState("Tip"); // frontend only for display
-  const [commentText, setCommentText] = useState({}); // per-post comment input
+  const [category, setCategory] = useState("Tip"); 
+  const [commentText, setCommentText] = useState({}); 
   const [openComments, setOpenComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
 
   const API_BASE = "https://green-path.onrender.com/api";
 
-  // Fetch posts
   const fetchPosts = async () => {
     try {
       const res = await axios.get(`${API_BASE}/posts`);
@@ -26,13 +25,12 @@ const Community = () => {
     fetchPosts();
   }, []);
 
-  // Create new post
   const handlePost = async () => {
     if (!newPost.trim()) return;
     try {
       await axios.post(`${API_BASE}/posts`, {
         content: newPost,
-        user_id: 1, // default user
+        user_id: 1, 
       });
       setNewPost("");
       setCategory("Tip");
@@ -42,7 +40,6 @@ const Community = () => {
     }
   };
 
-  // Like post
   const handleLike = async (id) => {
     try {
       const alreadyLiked = likedPosts.includes(id);
@@ -62,7 +59,6 @@ const Community = () => {
     }
   };
 
-  // Add comment
   const handleComment = async (postId) => {
     const text = commentText[postId];
     if (!text?.trim()) return;
@@ -79,7 +75,6 @@ const Community = () => {
     }
   };
 
-  // Delete post
   const handleDeletePost = async (id) => {
     try {
       await axios.delete(`${API_BASE}/posts/${id}`);
@@ -89,7 +84,6 @@ const Community = () => {
     }
   };
 
-  // Delete comment
   const handleDeleteComment = async (postId, commentId) => {
     try {
       await axios.delete(`${API_BASE}/posts/${postId}/comments/${commentId}`);
@@ -99,7 +93,6 @@ const Community = () => {
     }
   };
 
-  // Toggle comments visibility
   const toggleComments = (id) => {
     setOpenComments((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -108,10 +101,9 @@ const Community = () => {
     <div className="community-wrapper">
       <div className="community-header">
         <h1>Community</h1>
-        <p>Post a milestone, tip, or question to inspire others 🌍</p>
+        <p>Post a milestone, tip, or question to inspire others </p>
       </div>
 
-      {/* Create Post */}
       <div className="post-creator">
         <textarea
           placeholder="What sustainability insight would you like to share?"
@@ -134,10 +126,9 @@ const Community = () => {
         </button>
       </div>
 
-      {/* Posts Section */}
       <div className="posts-list">
         {posts.length === 0 ? (
-          <p className="no-posts">No posts yet. Be the first to share 🌱</p>
+          <p className="no-posts">No posts yet. Be the first to share </p>
         ) : (
           posts.map((post) => (
             <div key={post.id} className="post-card">
@@ -190,7 +181,6 @@ const Community = () => {
                 </button>
               </div>
 
-              {/* Comments Section */}
               {openComments[post.id] && (
                 <div className="comments-section">
                   {post.comments?.map((c) => (

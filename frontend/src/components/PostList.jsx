@@ -5,6 +5,7 @@ function PostList() {
 
   useEffect(() => {
     fetch("https://green-path.onrender.com") 
+    fetch("https://green-path.onrender.com/community") 
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((err) => console.error("Error fetching posts:", err));

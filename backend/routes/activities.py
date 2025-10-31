@@ -5,31 +5,38 @@ from datetime import datetime
 
 activities_bp = Blueprint("activities_bp", __name__, url_prefix="/api/activities")
 
-# --- Estimate Emission (simple AI placeholder) ---
 @activities_bp.route("/estimate-emission", methods=["POST", "OPTIONS"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"])
 def estimate_emission():
     if request.method == "OPTIONS":
         return '', 200
 
     data = request.get_json()
     description = data.get("description", "")
-    emission = round(len(description) * 0.1, 2)  # Simple placeholder formula
+    emission = round(len(description) * 0.1, 2)  
     return jsonify({"emission": emission, "problem": "No problem generated.", "solution": "No solution provided."}), 200
 
-
-# --- Get all activities (newest first) ---
 @activities_bp.route("/", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",              
+    "http://127.0.0.1:5173"
+])
 def get_activities():
     activities = Activity.query.order_by(Activity.id.desc()).all()
     results = [a.to_dict() for a in activities]
     return jsonify(results), 200
 
 
-# --- Get the most recent activity ---
 @activities_bp.route("/latest", methods=["GET", "OPTIONS"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app", 
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def get_latest_activity():
     if request.method == "OPTIONS":
         return '', 200
@@ -41,9 +48,12 @@ def get_latest_activity():
         return jsonify({"message": "No activities found"}), 404
 
 
-# --- Log a new activity ---
 @activities_bp.route("/log-activity", methods=["POST"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def log_activity():
     data = request.get_json()
     try:
@@ -63,10 +73,12 @@ def log_activity():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-
-# --- Edit an existing activity ---
 @activities_bp.route("/<int:activity_id>", methods=["PATCH"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def edit_activity(activity_id):
     data = request.get_json()
     activity = Activity.query.get(activity_id)
@@ -87,9 +99,12 @@ def edit_activity(activity_id):
         return jsonify({"error": str(e)}), 500
 
 
-# --- Delete an activity ---
 @activities_bp.route("/<int:activity_id>", methods=["DELETE"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  # ✅ your live frontend
+    "http://localhost:5173",               # for local development
+    "http://127.0.0.1:5173"
+])
 def delete_activity(activity_id):
     activity = Activity.query.get(activity_id)
     if not activity:
@@ -103,10 +118,12 @@ def delete_activity(activity_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-
-# --- Clear all activities (for Dashboard “Clear All” button) ---
 @activities_bp.route("/clear", methods=["POST", "OPTIONS"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  # ✅ your live frontend
+    "http://localhost:5173",               # for local development
+    "http://127.0.0.1:5173"
+])
 def clear_all_activities():
     if request.method == "OPTIONS":
         return '', 200

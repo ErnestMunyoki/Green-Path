@@ -2,12 +2,8 @@ from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 from models import db, Post, Comment, User
 
-# Blueprint without prefix
 community_bp = Blueprint("community_bp", __name__)
 
-# ---------------------
-# POSTS ROUTES
-# ---------------------
 @community_bp.route("/api/posts", methods=["GET", "POST", "OPTIONS"])
 @cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 def posts():
@@ -23,8 +19,7 @@ def posts():
         if not data or not data.get("content"):
             return jsonify({"error": "Content cannot be empty"}), 400
 
-        # Ensure a valid user_id exists
-        user_id = data.get("user_id", 1)  # Default to user with id=1
+        user_id = data.get("user_id", 1)  
         user = User.query.get(user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
@@ -37,10 +32,6 @@ def posts():
         db.session.commit()
         return jsonify(post.to_dict()), 201
 
-
-# ---------------------
-# COMMENTS ROUTES
-# ---------------------
 @community_bp.route("/api/posts/<int:post_id>/comments", methods=["POST", "OPTIONS"])
 @cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 def add_comment(post_id):
@@ -55,7 +46,7 @@ def add_comment(post_id):
     if not post:
         return jsonify({"error": "Post not found"}), 404
 
-    user_id = data.get("user_id", 1)  # Default user_id
+    user_id = data.get("user_id", 1)  
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -69,10 +60,6 @@ def add_comment(post_id):
     db.session.commit()
     return jsonify(comment.to_dict()), 201
 
-
-# ---------------------
-# LIKE A POST
-# ---------------------
 @community_bp.route("/api/posts/<int:post_id>/like", methods=["POST", "OPTIONS"])
 @cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 def like_post(post_id):
@@ -83,7 +70,6 @@ def like_post(post_id):
     if not post:
         return jsonify({"error": "Post not found"}), 404
 
-    # Add a likes column if needed
     if not hasattr(post, "likes"):
         setattr(post, "likes", 0)
 
@@ -91,10 +77,6 @@ def like_post(post_id):
     db.session.commit()
     return jsonify({"message": "Post liked!", "likes": post.likes}), 200
 
-
-# ---------------------
-# DELETE A POST
-# ---------------------
 @community_bp.route("/api/posts/<int:post_id>", methods=["DELETE", "OPTIONS"])
 @cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 def delete_post(post_id):
@@ -109,12 +91,12 @@ def delete_post(post_id):
     db.session.commit()
     return jsonify({"message": "Post deleted successfully!"}), 200
 
-
-# ---------------------
-# DELETE A COMMENT
-# ---------------------
 @community_bp.route("/api/posts/<int:post_id>/comments/<int:comment_id>", methods=["DELETE", "OPTIONS"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def delete_comment(post_id, comment_id):
     if request.method == "OPTIONS":
         return "", 200

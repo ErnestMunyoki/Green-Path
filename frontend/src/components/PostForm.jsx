@@ -11,7 +11,7 @@ function PostForm() {
     e.preventDefault();
     const newPost = { title, content, author };
 
-    fetch("http://localhost:5000/community", {
+    fetch("https://green-path.onrender.com/community", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newPost),
