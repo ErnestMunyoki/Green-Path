@@ -130,7 +130,6 @@ function Login() {
     }
   };
 
-  // ✅ Show loading state before Firebase confirms
   if (loading) {
     return (
       <div className="app-container">
@@ -141,14 +140,12 @@ function Login() {
     );
   }
 
-  // ✅ Main Login UI
   return (
     <div className="app-container">
       <div className="login-card">
         <h2>Welcome</h2>
-        <p>Track your carbon footprint and make a positive impact 🌿</p>
+        <p>Track your carbon footprint and make a positive impact</p>
 
-        {/* Tabs for Login/Register */}
         <div className="tab-buttons">
           <button
             className={isLogin ? "active" : ""}
@@ -164,7 +161,6 @@ function Login() {
           </button>
         </div>
 
-        {/* Email Form */}
         <form onSubmit={handleSubmit}>
           <label>Email</label>
           <input
@@ -189,7 +185,6 @@ function Login() {
           </button>
         </form>
 
-        {/* Social Login */}
         <div className="divider">
           <span>OR CONTINUE WITH</span>
         </div>

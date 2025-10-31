@@ -7,7 +7,7 @@ load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 
 if not api_key:
-    print("❌ No API key found. Please add GOOGLE_API_KEY=your_key to .env file.")
+    print("No API key found. Please add GOOGLE_API_KEY=your_key to .env file.")
     exit()
 
 # Configure Gemini

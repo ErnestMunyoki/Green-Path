@@ -6,7 +6,6 @@ const AiInsights = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Load the most recent AI insight from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("latest_ai_insight");
     if (saved) {
@@ -14,18 +13,16 @@ const AiInsights = () => {
     }
   }, []);
 
-  // ✅ Fetch AI-generated sustainability insight (POST)
   const handleGenerateInsight = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
+      const response = await fetch("https://green-path.onrender.com/api/ai/estimate-emission", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        // 🧠 You can later replace this with real data from your activity log
         body: JSON.stringify({
           name: "Car commute (10km)",
           user_id: 1,
@@ -38,7 +35,6 @@ const AiInsights = () => {
 
       const data = await response.json();
 
-      // ✅ Save and display the AI-generated insight
       setInsight(data);
       localStorage.setItem("latest_ai_insight", JSON.stringify(data));
     } catch (err) {
@@ -64,7 +60,7 @@ const AiInsights = () => {
         {loading ? "Analyzing..." : "Generate AI Insight"}
       </button>
 
-      {error && <p className="error">⚠️ {error}</p>}
+      {error && <p className="error">{error}</p>}
 
       {insight && (
         <div className="insight-box">

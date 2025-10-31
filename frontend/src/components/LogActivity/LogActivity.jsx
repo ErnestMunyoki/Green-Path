@@ -21,7 +21,6 @@ export default function LogActivity({ currentUser, onActivityLogged }) {
 
   return (
     <div className="log-activity">
-      {/* Sidebar */}
       <aside className="sidebar">
         <h2>GreenPath</h2>
         <nav className="nav">

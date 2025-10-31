@@ -1,9 +1,6 @@
 from datetime import datetime, date
 from extensions import db
 
-# -------------------------
-# USER MODEL
-# -------------------------
 class User(db.Model):
     __tablename__ = "users"
 
@@ -24,10 +21,6 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.username}>"
 
-
-# -------------------------
-# ACTIVITY MODEL
-# -------------------------
 class Activity(db.Model):
     __tablename__ = "activities"
 
@@ -57,10 +50,6 @@ class Activity(db.Model):
             "date": self.date.isoformat(),
         }
 
-
-# -------------------------
-# ACHIEVEMENT MODEL
-# -------------------------
 class Achievement(db.Model):
     __tablename__ = "achievements"
 
@@ -88,10 +77,6 @@ class Achievement(db.Model):
             "date_awarded": self.date_awarded.isoformat() if self.date_awarded else None,
         }
 
-
-# -------------------------
-# POST MODEL
-# -------------------------
 class Post(db.Model):
     __tablename__ = "posts"
 
@@ -117,9 +102,6 @@ class Post(db.Model):
         }
 
 
-# -------------------------
-# COMMENT MODEL
-# -------------------------
 class Comment(db.Model):
     __tablename__ = "comments"
 

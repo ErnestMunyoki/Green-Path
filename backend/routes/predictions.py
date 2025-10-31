@@ -1,11 +1,10 @@
-# routes/predictions.py
+
 from flask import Blueprint, jsonify
 from datetime import datetime, timedelta
 import random
 
 predictions_bp = Blueprint("predictions_bp", __name__, url_prefix="/api/predictions")
 
-# Mock user activity data
 user_activities = [
     {"date": "2025-10-21", "emission": 12.5},
     {"date": "2025-10-22", "emission": 13.2},

@@ -7,7 +7,11 @@ stats_bp = Blueprint("stats_bp", __name__, url_prefix="/api/stats")
 
 # --- Overall Stats ---
 @stats_bp.route("/", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def get_overall_stats():
     """
     Returns total activities, total emissions, and average emission per activity.
@@ -34,7 +38,11 @@ def get_overall_stats():
 
 # --- Weekly Emissions ---
 @stats_bp.route("/weekly-emissions", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def get_weekly_emissions():
     """
     Returns total CO₂ emissions for each day of the current week (Monday–Sunday).
@@ -67,7 +75,11 @@ def get_weekly_emissions():
 
 # --- Monthly Stats ---
 @stats_bp.route("/monthly-stats", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def get_monthly_stats():
     """
     Returns total CO₂ emissions per day for the last 30 days.

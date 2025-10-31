@@ -14,15 +14,14 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
   const [loadingEmission, setLoadingEmission] = useState(false);
 
   const categories = [
-    { label: "Commuting", icon: "🚗" },
-    { label: "Meals", icon: "🍴" },
-    { label: "Energy", icon: "⚡" },
-    { label: "Shopping", icon: "🛒" },
-    { label: "Travel", icon: "🧳" },
-    { label: "Other", icon: "➕" },
+    { label: "Commuting", icon: "" },
+    { label: "Meals", icon: "" },
+    { label: "Energy", icon: "" },
+    { label: "Shopping", icon: "" },
+    { label: "Travel", icon: "" },
+    { label: "Other", icon: "" },
   ];
 
-  // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("activities");
     if (saved) {
@@ -32,7 +31,6 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
     }
   }, []);
 
-  // Save to localStorage whenever activities change
   useEffect(() => {
     localStorage.setItem("activities", JSON.stringify(activities));
     setTotalEmission(activities.reduce((sum, a) => sum + (a.emission || 0), 0));
@@ -41,7 +39,7 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
   const estimateEmission = async (activityName) => {
     setLoadingEmission(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/ai/estimate-emission", {
+      const res = await fetch("https://green-path.onrender.com/api/ai/estimate-emission", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: activityName }),
@@ -140,7 +138,7 @@ export default function ActivityForm({ currentUser, onActivityLogged }) {
 
           console.log("Sending activity:", payload);
 
-          return fetch("http://127.0.0.1:5000/api/activities/log-activity", {
+          return fetch("https://green-path.onrender.com/api/activities/log-activity", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),

@@ -9,30 +9,26 @@ log_activity_bp = Blueprint("log_activity", __name__, url_prefix="/api")
 @log_activity_bp.route("/activities/log-activity", methods=["POST", "OPTIONS"])
 def log_activity():
     if request.method == "OPTIONS":
-        return jsonify({}), 200  # CORS preflight
+        return jsonify({}), 200 
 
     try:
         data = request.get_json() or {}
-        logging.info(f"📩 Payload received for logging: {data}")
+        logging.info(f"Payload received for logging: {data}")
 
-        # Required fields with safe defaults
         name = str(data.get("name", "")).strip() or "Unnamed activity"
         category = str(data.get("category", "")).strip() or "Uncategorized"
 
-        # Safe user_id
         try:
             user_id = int(data.get("user_id", 1))
         except (TypeError, ValueError):
             user_id = 1
 
-        # Safe date parsing
         date_str = str(data.get("date", "")).strip()
         try:
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         except (ValueError, TypeError):
             date_obj = datetime.utcnow()
 
-        # Safe emission, problem, solution
         try:
             emission = float(data.get("emission", 0))
         except (TypeError, ValueError):
@@ -43,7 +39,6 @@ def log_activity():
         distance_km = float(data.get("distance_km", 0))
         vehicle_type = str(data.get("vehicle_type", "other"))
 
-        # ✅ AI insight fallback
         try:
             ai_output = AIInsightsService.generate_insight(
                 activity_name=name,
@@ -55,9 +50,8 @@ def log_activity():
                 problem = str(ai_output.get("problem", problem))
                 solution = str(ai_output.get("solution", solution))
         except Exception as ai_err:
-            logging.warning(f"⚠️ AI insight generation failed: {ai_err}")
+            logging.warning(f"AI insight generation failed: {ai_err}")
 
-        # Create and commit activity
         activity = Activity(
             user_id=user_id,
             name=name,
@@ -73,7 +67,7 @@ def log_activity():
         db.session.add(activity)
         db.session.commit()
 
-        logging.info(f"✅ Activity '{name}' logged successfully for user_id {user_id}.")
+        logging.info(f"Activity '{name}' logged successfully for user_id {user_id}.")
 
         return jsonify({
             "message": "Activity logged successfully",
@@ -91,6 +85,6 @@ def log_activity():
         }), 201
 
     except Exception as e:
-        logging.error(f"❌ Error logging activity: {e}")
+        logging.error(f"Error logging activity: {e}")
         db.session.rollback()
         return jsonify({"error": "Server error while logging activity"}), 500

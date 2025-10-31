@@ -417,3 +417,209 @@ form input:focus {
   margin-top: 1rem;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+/* ================================
+   🌿 ACTIVITY FORM ENHANCEMENTS
+   ================================ */
+
+.activity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease-in-out;
+}
+
+.activity-form:hover {
+  transform: translateY(-2px);
+}
+
+/* Title */
+.activity-form h2 {
+  text-align: center;
+  color: #2e7d32;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+/* Category Buttons */
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.category-buttons button {
+  flex: 1 1 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #2e7d32;
+  background-color: #ffffff;
+  color: #2e7d32;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.category-buttons button:hover {
+  background-color: #e8f5e9;
+}
+
+.category-buttons button.selected {
+  background-color: #2e7d32;
+  color: white;
+  box-shadow: 0 0 8px rgba(46, 125, 50, 0.4);
+}
+
+/* Input Fields */
+.activity-form label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #444;
+  margin-top: 8px;
+}
+
+.activity-form input[type="text"],
+.activity-form input[type="date"] {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+.activity-form input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  background-color: #ffffff;
+}
+
+/* Add/Update Button */
+.activity-form button[type="button"] {
+  background-color: #2e7d32;
+  color: #ffffff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease-in-out;
+}
+
+.activity-form button[type="button"]:hover {
+  background-color: #388e3c;
+  transform: scale(1.03);
+}
+
+/* Activities List */
+.activity-form ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-form li {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.activity-form li:hover {
+  background-color: #f1f1f1;
+}
+
+.activity-form li strong {
+  color: #2e7d32;
+}
+
+/* Edit / Remove Buttons */
+.activity-form li button {
+  margin-top: 6px;
+  margin-right: 6px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.activity-form li button:first-of-type {
+  background-color: #1976d2;
+  color: white;
+}
+
+.activity-form li button:last-of-type {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.activity-form li button:hover {
+  opacity: 0.9;
+}
+
+/* Problem & Solution */
+.activity-form li div p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.activity-form li div p strong {
+  color: #333;
+}
+
+/* Total Emission Display */
+.activity-form div strong {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.activity-form div {
+  text-align: center;
+  font-size: 15px;
+}
+
+/* Submit All Button */
+.activity-form button[type="submit"] {
+  background-color: #388e3c;
+  color: #fff;
+  border: none;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.activity-form button[type="submit"]:hover {
+  background-color: #2e7d32;
+  transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .activity-form {
+    padding: 20px;
+  }
+
+  .category-buttons button {
+    flex: 1 1 100%;
+  }
+}

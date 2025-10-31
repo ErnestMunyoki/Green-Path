@@ -19,12 +19,15 @@ def parse_activity_date(activity_date):
             return datetime.strptime(activity_date, "%Y-%m-%d").date()
         except ValueError:
             return None
-    return activity_date  # assume it's already a date
+    return activity_date 
 
 
-# --- Weekly Emissions ---
 @emissions_bp.route("/weekly", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",             
+    "http://127.0.0.1:5173"
+])
 def get_weekly_emissions():
     """
     Returns total CO₂ emissions for each day of the current week (Monday–Sunday).
@@ -66,7 +69,11 @@ def get_weekly_emissions():
 
 # --- Monthly Emissions ---
 @emissions_bp.route("/monthly", methods=["GET"])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+@cross_origin(origins=[
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",               
+    "http://127.0.0.1:5173"
+])
 def get_monthly_emissions():
     """
     Returns total CO₂ emissions for each day of the current month.
