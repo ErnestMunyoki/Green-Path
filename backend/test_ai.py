@@ -1,6 +1,5 @@
 from services.ai_insights import AIInsightsService
 
-# Test a sample activity
 result = AIInsightsService.generate_insight(
     "Car commute 10km",
     distance_km=10,
