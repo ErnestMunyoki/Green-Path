@@ -133,7 +133,7 @@ const Predictions = () => {
       </div>
 
       {loading && <p>Loading predictions...</p>}
-      {error && <p className="error">Error: {error} ⚠️</p>}
+      {error && <p className="error">Error: {error} </p>}
     </div>
   );
 };
