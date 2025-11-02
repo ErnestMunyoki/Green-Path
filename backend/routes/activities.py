@@ -101,8 +101,8 @@ def edit_activity(activity_id):
 
 @activities_bp.route("/<int:activity_id>", methods=["DELETE"])
 @cross_origin(origins=[
-    "https://green-path-m5yh.vercel.app",  # ✅ your live frontend
-    "http://localhost:5173",               # for local development
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",              
     "http://127.0.0.1:5173"
 ])
 def delete_activity(activity_id):
@@ -120,8 +120,8 @@ def delete_activity(activity_id):
 
 @activities_bp.route("/clear", methods=["POST", "OPTIONS"])
 @cross_origin(origins=[
-    "https://green-path-m5yh.vercel.app",  # ✅ your live frontend
-    "http://localhost:5173",               # for local development
+    "https://green-path-m5yh.vercel.app",  
+    "http://localhost:5173",             
     "http://127.0.0.1:5173"
 ])
 def clear_all_activities():
