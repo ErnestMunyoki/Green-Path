@@ -5,7 +5,6 @@ from datetime import date, timedelta, datetime
 
 stats_bp = Blueprint("stats_bp", __name__, url_prefix="/api/stats")
 
-# --- Overall Stats ---
 @stats_bp.route("/", methods=["GET"])
 @cross_origin(origins=[
     "https://green-path-m5yh.vercel.app",  
@@ -36,7 +35,6 @@ def get_overall_stats():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- Weekly Emissions ---
 @stats_bp.route("/weekly-emissions", methods=["GET"])
 @cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://green-path.onrender.com"])
 @cross_origin(origins=[
@@ -51,7 +49,7 @@ def get_weekly_emissions():
     try:
         user_id = request.args.get("user_id", type=int)
         today = date.today()
-        week_start = today - timedelta(days=today.weekday())  # Monday
+        week_start = today - timedelta(days=today.weekday())  
         week_days = [(week_start + timedelta(days=i)) for i in range(7)]
         weekly_data = {day.strftime("%A"): 0.0 for day in week_days}
 
@@ -61,7 +59,6 @@ def get_weekly_emissions():
 
         activities = query.all()
         for activity in activities:
-            # Ensure date is a date object
             activity_date = activity.date
             if isinstance(activity_date, datetime):
                 activity_date = activity_date.date()
@@ -74,7 +71,6 @@ def get_weekly_emissions():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- Monthly Stats ---
 @stats_bp.route("/monthly-stats", methods=["GET"])
 @cross_origin(origins=[
     "https://green-path-m5yh.vercel.app",
@@ -103,7 +99,6 @@ def get_monthly_stats():
             day_str = activity_date.strftime("%Y-%m-%d")
             result[day_str] = result.get(day_str, 0) + float(activity.emission or 0.0)
 
-        # Sort results by date
         sorted_result = dict(sorted(result.items()))
         return jsonify(sorted_result), 200
 
