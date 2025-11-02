@@ -1,18 +1,18 @@
-# 🌿 GreenPath
+#  GreenPath
 
 **GreenPath** is a sustainability tracking web app that helps users monitor and reduce their carbon footprint.  
 Users can log eco-friendly activities, track emission data, and receive AI-powered insights to live more sustainably.
 
 ---
 
-## 🚀 Live Links
+##  Live Links
 
 - **Frontend (Vercel):** [https://green-path-pearl.vercel.app](https://green-path-pearl.vercel.app)  
 - **Backend (Render):** [https://green-path.onrender.com](https://green-path.onrender.com)
 
 ---
 
-## 🧩 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **React.js (Vite)**
@@ -30,7 +30,7 @@ Users can log eco-friendly activities, track emission data, and receive AI-power
 
 ---
 
-## ⚙️ Project Structure
+##  Project Structure
 
 Green-Path/
 │
@@ -61,19 +61,19 @@ Copy code
 
 ---
 
-## 🧠 Features
+##  Features
 
-✅ Log daily activities and view total emissions  
-✅ View AI-powered sustainability insights  
-✅ Visualize your weekly carbon data  
-✅ Participate in the community section  
-✅ Authentication and user-based activity logging  
+ Log daily activities and view total emissions  
+ View AI-powered sustainability insights  
+ Visualize your weekly carbon data  
+ Participate in the community section  
+ Authentication and user-based activity logging  
 
 ---
 
-## 🌍 Deployment Configuration
+##  Deployment Configuration
 
-### 🔹 Backend (Render)
+###  Backend (Render)
 1. **Root setup**
    - Place `requirements.txt` and `runtime.txt` in the project root.
    - Set **Start Command** in Render to:
@@ -97,7 +97,7 @@ Copy code
 Environment Variables
 
 
-🔹 Frontend (Vercel)
+ # Frontend (Vercel)
 Base URL Configuration
 
 Replace all local API URLs (e.g., http://127.0.0.1:5000) with:
@@ -112,7 +112,7 @@ Build Command: npm run build
 
 Output Directory: dist
 
-🧪 Local Development
+ # Local Development
 Backend
 bash
 Copy code
@@ -127,7 +127,7 @@ npm install
 npm run dev
 Then open http://localhost:5173
 
-🧰 Environment Variables
+ # Environment Variables
 Backend (.env or Render)
 ini
 Copy code
@@ -141,17 +141,17 @@ VITE_API_BASE_URL=https://green-path.onrender.com
 VITE_FIREBASE_API_KEY=your_firebase_key
 
 
-👥 Collaborators
+# Collaborators
 Name	Role
 Ernest Munyoki	Full-Stack Developer
 Fred Mwangi	Backend Developer
 Mary Nyarangi	Frontend Developer
 
 
-🪴 License
+# License
 This project is licensed under the MIT License — feel free to use and improve it.
 
-"Small actions make a big impact — start your green path today." 🌱
+"Small actions make a big impact — start your green path today." 
 
 ---
 
