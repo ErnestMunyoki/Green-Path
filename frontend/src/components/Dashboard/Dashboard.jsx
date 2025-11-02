@@ -68,7 +68,7 @@ const handleClearAllData = async () => {
   if (!window.confirm("Clear all emissions and activity data?")) return;
 
   try {
-    const res = await fetch(`${API_BASE}/activities/clear`, {  // <-- updated URL
+    const res = await fetch(`${API_BASE}/activities/clear`, {  
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
