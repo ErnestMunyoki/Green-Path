@@ -7,7 +7,7 @@ ai_bp = Blueprint("ai", __name__, url_prefix="/api/ai")
 @ai_bp.route("/estimate-emission", methods=["POST", "OPTIONS"])
 def estimate_emission():
     if request.method == "OPTIONS":
-        return jsonify({}), 200  # CORS preflight
+        return jsonify({}), 200  
 
     try:
         data = request.get_json() or {}
@@ -20,7 +20,6 @@ def estimate_emission():
             distance_km = 0.0
         vehicle_type = str(data.get("vehicle_type", "other")).strip() or "other"
 
-        # Generate AI insight safely
         ai_result = {
             "emission": 0.0,
             "problem": "No problem generated.",
@@ -40,10 +39,10 @@ def estimate_emission():
             if isinstance(output, dict):
                 ai_result.update(output)
         except Exception as e:
-            logging.warning(f"⚠️ AI generation failed: {e}")
+            logging.warning(f"AI generation failed: {e}")
 
         return jsonify(ai_result), 200
 
     except Exception as e:
-        logging.error(f"❌ AI endpoint error: {e}", exc_info=True)
+        logging.error(f"AI endpoint error: {e}", exc_info=True)
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
