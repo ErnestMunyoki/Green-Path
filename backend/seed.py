@@ -8,7 +8,7 @@ app = create_app()
 
 with app.app_context():
     
-    print(f"📘 Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     
     db.drop_all()
@@ -45,4 +45,4 @@ with app.app_context():
     db.session.bulk_save_objects(sample_activities + sample_achievements)
     db.session.commit()
 
-    print("✅ Seeded database with sample user, activities, and achievements.")
+    print(" Seeded database with sample user, activities, and achievements.")
