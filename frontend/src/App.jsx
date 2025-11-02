@@ -22,13 +22,11 @@ export default function App() {
 
   if (loading) return <div>Loading...</div>;
 
-  // Public route wrapper
   const PublicRoute = ({ children }) => {
     if (user) return <Navigate to="/dashboard" replace />;
     return children;
   };
 
-  // Protected route wrapper
   const ProtectedRoute = ({ children }) => {
     if (!user) return <Navigate to="/login" replace />;
     return children;
@@ -37,7 +35,6 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Login */}
         <Route
           path="/login"
           element={
@@ -47,7 +44,6 @@ export default function App() {
           }
         />
 
-        {/* Protected pages */}
         <Route
           path="/dashboard"
           element={
@@ -88,8 +84,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
