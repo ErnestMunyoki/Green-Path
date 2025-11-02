@@ -37,11 +37,9 @@ export default function LogActivity({ currentUser, onActivityLogged }) {
         </nav>
       </aside>
 
-      {/* Main content */}
       <main className="main">
         <section className="form-panel">
           <h3>Log a New Activity</h3>
-          {/* Pass currentUser down to ActivityForm */}
           <ActivityForm currentUser={currentUser} onActivityLogged={onActivityLogged} />
         </section>
       </main>
