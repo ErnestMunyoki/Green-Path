@@ -35,15 +35,13 @@ def get_weekly_emissions():
     """
     try:
         user_id = request.args.get("user_id", type=int)
-        today = datetime.now().date()  # Local date
-        start_of_week = today - timedelta(days=today.weekday())  # Monday
-        end_of_week = start_of_week + timedelta(days=6)  # Sunday
+        today = datetime.now().date()  
+        start_of_week = today - timedelta(days=today.weekday())  
+        end_of_week = start_of_week + timedelta(days=6) 
 
-        # Prepare result dictionary with day names
         week_days = [(start_of_week + timedelta(days=i)) for i in range(7)]
         result = {day.strftime("%A"): 0.0 for day in week_days}
 
-        # Query activities in current week (all future and past days)
         query = Activity.query.filter(
             cast(Activity.date, Date) >= start_of_week,
             cast(Activity.date, Date) <= end_of_week
@@ -66,8 +64,6 @@ def get_weekly_emissions():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# --- Monthly Emissions ---
 @emissions_bp.route("/monthly", methods=["GET"])
 @cross_origin(origins=[
     "https://green-path-m5yh.vercel.app",  
@@ -81,14 +77,12 @@ def get_monthly_emissions():
     """
     try:
         user_id = request.args.get("user_id", type=int)
-        today = datetime.now().date()  # Local date
+        today = datetime.now().date()  
         start_of_month = today.replace(day=1)
         days_in_month = calendar.monthrange(today.year, today.month)[1]
 
-        # Prepare result dictionary with day numbers as keys
         result = {str(day): 0.0 for day in range(1, days_in_month + 1)}
 
-        # Query activities in current month
         query = Activity.query.filter(
             cast(Activity.date, Date) >= start_of_month
         )
@@ -105,7 +99,6 @@ def get_monthly_emissions():
             if day_str in result:
                 result[day_str] += float(activity.emission or 0.0)
 
-        # Sort by day
         sorted_result = dict(sorted(result.items(), key=lambda x: int(x[0])))
 
         return jsonify(sorted_result), 200
